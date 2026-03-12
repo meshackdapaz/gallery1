@@ -44,6 +44,10 @@ const getThemeStyles = (type: string) => {
   }
 };
 
+export function generateStaticParams() {
+  return [];
+}
+
 export default function GalleryPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = use(params);
   const [event, setEvent] = useState<any>(null);

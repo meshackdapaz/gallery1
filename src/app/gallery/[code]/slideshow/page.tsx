@@ -5,6 +5,10 @@ import { createClient } from '@/utils/supabase/client';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
+export function generateStaticParams() {
+  return [];
+}
+
 export default function SlideshowPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = use(params);
   const [event, setEvent] = useState<any>(null);
