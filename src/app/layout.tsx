@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import SplashScreen from '@/components/SplashScreen';
 import Navbar from '@/components/Navbar';
+import { InsforgeProvider } from './providers';
 
 export const metadata: Metadata = {
   title: 'Memorial Gallery',
@@ -16,9 +17,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        <SplashScreen />
-        <Navbar />
-        {children}
+        <InsforgeProvider>
+          <SplashScreen />
+          <Navbar />
+          {children}
+        </InsforgeProvider>
       </body>
     </html>
   );
