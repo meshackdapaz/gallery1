@@ -26,8 +26,8 @@ export default function Navbar() {
   }, [supabase.auth]);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 p-4 flex justify-between items-center z-50 pointer-events-none">
-      <Link href="/" className="font-bold tracking-widest text-lg pointer-events-auto">M G</Link>
+    <nav className="fixed top-0 left-0 right-0 p-4 px-[env(safe-area-inset-left,1rem)] px-[env(safe-area-inset-right,1rem)] flex justify-between items-center z-50 pointer-events-none">
+      <Link href="/" className="font-serif italic text-xl pointer-events-auto">V</Link>
       <div className="flex gap-4 pointer-events-auto">
         {!user ? (
           <div className="flex gap-2 text-sm font-semibold">

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Camera, Users, Sparkles, ArrowRight, ArrowUpRight, Crown, CheckCircle2, Loader2 } from 'lucide-react';
+import { Users, Sparkles, ArrowRight, ArrowUpRight, Crown, CheckCircle2, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/utils/supabase/client';
 
@@ -44,84 +44,77 @@ export default function LandingPage() {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
-      transition: { staggerChildren: 0.15, delayChildren: 0.2 }
+      transition: { staggerChildren: 0.1, delayChildren: 0.1 }
     }
   };
 
   const itemVariants: any = {
-    hidden: { opacity: 0, y: 30 },
-    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 260, damping: 20 } }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-black relative overflow-hidden">
-      {/* Dynamic Background Glows */}
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 2, ease: "easeOut" }}
-        className="absolute top-0 right-0 w-[800px] h-[800px] bg-white/[0.03] rounded-full blur-[150px] pointer-events-none translate-x-1/3 -translate-y-1/3" 
-      />
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 2, ease: "easeOut", delay: 0.5 }}
-        className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-white/[0.02] rounded-full blur-[120px] pointer-events-none -translate-x-1/3 translate-y-1/3" 
-      />
+    <div className="min-h-screen flex flex-col items-center bg-black text-white relative overflow-x-hidden pt-[env(safe-area-inset-top,2rem)] pb-[env(safe-area-inset-bottom,2rem)] px-[env(safe-area-inset-left,1.5rem)] px-[env(safe-area-inset-right,1.5rem)] lg:px-12">
+      {/* Background Ambience */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 right-[-10%] w-[120vw] h-[120vw] md:w-[60rem] md:h-[60rem] bg-white/[0.02] rounded-full blur-[120px] translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 left-[-10%] w-[100vw] h-[100vw] md:w-[40rem] md:h-[40rem] bg-white/[0.015] rounded-full blur-[100px] -translate-x-1/2 translate-y-1/2" />
+      </div>
 
-      <motion.div 
+      <motion.main 
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="relative z-10 w-full max-w-4xl flex flex-col items-center pt-20"
+        className="w-full max-w-[1280px] flex flex-col items-center z-10 py-12 md:py-24"
       >
-        {/* Header / Logo */}
-        <motion.div variants={itemVariants} className="mb-16 relative w-full flex flex-col items-center">
-          <div className="w-24 h-24 glass flex items-center justify-center mb-8 mx-auto rounded-3xl border border-white/10 shadow-[0_0_50px_rgba(255,255,255,0.1)]">
-            <Camera className="w-10 h-10 text-white/80" />
+        {/* Branding Section */}
+        <motion.section variants={itemVariants} className="flex flex-col items-center mb-16 md:mb-24 text-center w-full">
+          <div className="w-20 s-phone:w-16 md:w-28 aspect-square glass flex items-center justify-center mb-6 md:mb-10 rounded-2xl md:rounded-[2rem] border border-white/10 shadow-[0_0_40px_rgba(255,255,255,0.05)]">
+            <span className="text-3xl md:text-5xl font-serif italic text-white/90">V</span>
           </div>
-          <h1 className="text-6xl md:text-8xl font-light tracking-tighter mb-6 font-serif leading-tight">
-            MEMORIAL<br /><span className="text-white/50 italic">GALLERY</span>
+          
+          <h1 className="text-[clamp(2.5rem,8vw,5.5rem)] font-light tracking-tighter mb-4 md:mb-6 leading-[1.1] font-serif">
+            MEMORIAL<br /><span className="text-white/40 italic">GALLERY</span>
           </h1>
-          <p className="text-fg-secondary text-xl max-w-xl mx-auto font-light tracking-wide leading-relaxed">
-            Capture and curate life's most precious moments in a shared, real-time sanctuary.
+          
+          <p className="text-white/60 text-base md:text-xl max-w-[90%] md:max-w-[48rem] mx-auto font-light leading-relaxed px-4">
+            Curate life's most precious perspectives in a shared, real-time sanctuary.
           </p>
-        </motion.div>
+        </motion.section>
 
-        {/* Action Cards */}
-        <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl mx-auto">
-          {/* Host Card */}
-          <Link href="/host" className="block group">
-            <div className="glass-card h-full flex flex-col items-start text-left p-8 border hover:border-white/20 transition-all duration-500 hover:bg-white/[0.05] relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="p-4 bg-white/5 rounded-2xl mb-8 group-hover:scale-110 group-hover:bg-white/10 transition-all duration-500 border border-white/10">
-                <Users className="w-6 h-6 text-white" />
+        {/* Dynamic Grid: Adaptive based on manifesto widths */}
+        <motion.section variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 w-full max-w-[800px] mx-auto px-4">
+          {/* Host Action */}
+          <Link href="/host" className="group">
+            <div className="glass-card flex flex-col p-6 md:p-10 border border-white/5 hover:border-white/20 transition-all duration-500 h-full hover:bg-white/[0.03]">
+              <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 border border-white/10">
+                <Users className="w-5 h-5 text-white/80" />
               </div>
-              <h2 className="text-2xl font-serif font-light mb-3">Host an Event</h2>
-              <p className="text-fg-secondary mb-8 text-sm leading-relaxed">
-                Create a unique space and invite others to contribute their perspective.
+              <h2 className="text-xl md:text-2xl font-serif font-light mb-2">Host an Event</h2>
+              <p className="text-white/50 text-sm md:text-base leading-relaxed mb-8 flex-grow">
+                Create a private sanctuary and invite guests to contribute their unique viewpoint.
               </p>
-              <div className="mt-auto flex items-center gap-2 text-white font-medium group-hover:translate-x-2 transition-transform duration-300">
-                Create Session <ArrowRight className="w-4 h-4" />
+              <div className="flex items-center gap-2 text-sm md:text-base font-medium group-hover:translate-x-2 transition-transform">
+                Start Session <ArrowRight className="w-4 h-4" />
               </div>
             </div>
           </Link>
 
-          {/* Join Card */}
-          <div className="glass-card h-full flex flex-col items-start text-left p-8 border transition-all duration-500 relative overflow-hidden">
-            <div className="p-4 bg-white/5 rounded-2xl mb-8 border border-white/10">
-              <Sparkles className="w-6 h-6 text-white" />
+          {/* Join Action */}
+          <div className="glass-card flex flex-col p-6 md:p-10 border border-white/5 h-full">
+            <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center mb-6 border border-white/10">
+              <Sparkles className="w-5 h-5 text-white/80" />
             </div>
-            <h2 className="text-2xl font-serif font-light mb-3">Join Gallery</h2>
+            <h2 className="text-xl md:text-2xl font-serif font-light mb-2">Join Gallery</h2>
             
             {!isJoining ? (
               <>
-                <p className="text-fg-secondary mb-8 text-sm leading-relaxed">
-                  Enter an invite code to view and share photos in an existing event.
+                <p className="text-white/50 text-sm md:text-base leading-relaxed mb-8 flex-grow">
+                  Enter an invite code to view and share moments in an existing sanctuary.
                 </p>
                 <button 
                   onClick={() => setIsJoining(true)}
-                  className="mt-auto flex items-center gap-2 text-white font-medium hover:text-white/70 transition-colors"
+                  className="mt-auto flex items-center gap-2 text-sm md:text-base font-medium hover:text-white/70 transition-colors"
                 >
                   Enter Code <ArrowUpRight className="w-4 h-4" />
                 </button>
@@ -131,23 +124,23 @@ export default function LandingPage() {
                 <input 
                   autoFocus
                   type="text"
-                  placeholder="EX: AB12"
+                  placeholder="EX: CODE"
                   value={joinCode}
                   onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                  className="w-full bg-black/50 border border-white/20 rounded-xl px-4 py-3 text-center text-xl font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-white/40 transition-all text-white placeholder:text-white/20"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-4 text-center text-lg md:text-xl font-mono tracking-widest focus:outline-none focus:border-white/30 transition-all"
                 />
-                <div className="flex gap-3">
+                <div className="flex gap-2">
                   <button 
                     type="button"
                     onClick={() => setIsJoining(false)}
-                    className="flex-1 py-3 px-4 rounded-xl text-sm font-medium border border-white/10 hover:bg-white/5 transition-colors"
+                    className="flex-1 py-3 text-sm font-medium border border-white/10 rounded-lg hover:bg-white/5 transition-colors"
                   >
                     Cancel
                   </button>
                   <button 
                     type="submit"
                     disabled={!joinCode.trim()}
-                    className="flex-1 py-3 px-4 rounded-xl text-sm font-medium bg-white text-black hover:bg-white/90 disabled:opacity-50 transition-colors"
+                    className="flex-1 py-3 text-sm font-medium bg-white text-black rounded-lg hover:bg-gray-100 disabled:opacity-50 transition-colors"
                   >
                     Join
                   </button>
@@ -155,69 +148,58 @@ export default function LandingPage() {
               </form>
             )}
           </div>
-        </motion.div>
+        </motion.section>
 
-        {/* Go Pro Banner or Loading State */}
-        {authLoading ? (
-          <div className="w-full max-w-2xl mx-auto mt-6 flex justify-center py-12">
-            <Loader2 className="w-8 h-8 text-white/20 animate-spin" />
-          </div>
-        ) : (
-          user && !isPro && (
-            <motion.div variants={itemVariants} className="w-full max-w-2xl mx-auto mt-6">
-              <div className="glass-card relative overflow-hidden border border-white/20 p-8 text-left group">
-                <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/5 to-transparent opacity-50" />
-                <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-[80px] pointer-events-none group-hover:scale-150 transition-transform duration-1000" />
-                
-                <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Crown className="w-6 h-6 text-white" />
-                      <h2 className="text-2xl font-serif font-medium text-white">Upgrade to Pro</h2>
-                    </div>
-                    <p className="text-fg-secondary text-sm mb-6 leading-relaxed">
-                      Make your events unforgettable with premium features designed to amaze your guests.
-                    </p>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 mb-8">
-                      <div className="flex items-center gap-2 text-sm text-white/80">
-                        <CheckCircle2 className="w-4 h-4 text-white" /> Live TV Slideshow
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-white/80">
-                        <CheckCircle2 className="w-4 h-4 text-white" /> Audio Memos
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-white/80">
-                        <CheckCircle2 className="w-4 h-4 text-white" /> Disposable Camera Mode
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-white/80">
-                        <CheckCircle2 className="w-4 h-4 text-white" /> One-Click Zip Export
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="w-full md:w-auto shrink-0">
-                    <Link 
-                      href="/upgrade"
-                      className="flex justify-center items-center gap-2 bg-white hover:bg-gray-200 text-black font-semibold px-8 py-4 rounded-xl transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:shadow-[0_0_40px_rgba(255,255,255,0.4)] whitespace-nowrap"
-                    >
-                      Go Pro Now <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </div>
+        {/* Pro Banner - Fluid & Responsive */}
+        {!authLoading && user && !isPro && (
+          <motion.section variants={itemVariants} className="w-full max-w-[800px] mt-8 px-4">
+            <div className="glass-card p-6 md:p-10 border border-white/10 relative overflow-hidden flex flex-col md:flex-row gap-8 items-center md:text-left text-center">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.05] to-transparent pointer-events-none" />
+              
+              <div className="flex-1 relative z-10 w-full">
+                <div className="flex items-center gap-2 mb-4 justify-center md:justify-start">
+                  <Crown className="w-5 h-5 md:w-6 md:h-6" />
+                  <span className="font-serif text-xl md:text-2xl">Upgrade to PRO</span>
+                </div>
+                <p className="text-white/50 text-sm md:text-base mb-6">
+                  Enhance your ceremonies with TV Slideshows, Audio Memos, and one-click exports.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs md:text-sm text-white/70 text-left">
+                  <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> TV Slideshow Mode</span>
+                  <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> Guest Audio Memos</span>
+                  <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> Disposable Mode</span>
+                  <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> Hi-Res Zip Archive</span>
                 </div>
               </div>
-            </motion.div>
-          )
+
+              <div className="relative z-10 w-full md:w-auto">
+                <Link 
+                  href="/upgrade"
+                  className="w-full flex justify-center py-4 px-8 bg-white text-black font-bold rounded-xl hover:bg-gray-100 transition-all shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:shadow-[0_0_40px_rgba(255,255,255,0.2)]"
+                >
+                  Go PRO
+                </Link>
+              </div>
+            </div>
+          </motion.section>
         )}
 
-        {/* Footer Info */}
-        <motion.div variants={itemVariants} className="mt-20 text-fg-secondary/50 text-xs font-mono uppercase tracking-[0.2em] flex items-center gap-6">
-          <span>Real-time Sync</span>
-          <div className="w-1 h-1 bg-white/20 rounded-full" />
-          <span>Lossless Quality</span>
-          <div className="w-1 h-1 bg-white/20 rounded-full" />
-          <span>Privacy First</span>
-        </motion.div>
-      </motion.div>
+        {/* Adaptive Footer */}
+        <motion.footer 
+          variants={itemVariants} 
+          className="mt-24 md:mt-32 w-full px-6 flex flex-wrap justify-center gap-x-8 gap-y-4 text-[10px] md:text-xs font-mono uppercase tracking-[0.2em] text-white/30"
+        >
+          <span className="flex items-center gap-2 transition-colors hover:text-white/60 cursor-default">
+            <div className="w-1 h-1 bg-white/40 rounded-full animate-pulse" /> Real-time Sync
+          </span>
+          <span className="flex items-center gap-2 transition-colors hover:text-white/60 cursor-default">
+            <div className="w-1 h-1 bg-white/40 rounded-full" /> Lossless Quality
+          </span>
+          <span className="flex items-center gap-2 transition-colors hover:text-white/60 cursor-default">
+            <div className="w-1 h-1 bg-white/40 rounded-full" /> Privacy Secured
+          </span>
+        </motion.footer>
+      </motion.main>
     </div>
   );
 }

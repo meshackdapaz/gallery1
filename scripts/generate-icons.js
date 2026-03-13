@@ -11,7 +11,7 @@ async function generate() {
   const iconSvg = `
     <svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
       <rect width="1024" height="1024" fill="#000000" />
-      <text x="50%" y="60%" font-family="Georgia, serif" font-size="600" font-weight="normal" font-style="italic" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">M</text>
+      <text x="50%" y="60%" font-family="Georgia, serif" font-size="600" font-weight="normal" font-style="italic" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">V</text>
     </svg>
   `;
 
