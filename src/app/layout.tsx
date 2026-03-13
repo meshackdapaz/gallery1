@@ -7,6 +7,7 @@ import { InsforgeProvider } from './providers';
 export const metadata: Metadata = {
   title: 'Memorial Gallery',
   description: 'Shared, real-time sanctuary for precious moments.',
+  viewport: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no',
 };
 
 export default function RootLayout({
