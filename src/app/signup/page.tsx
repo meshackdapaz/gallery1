@@ -6,9 +6,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 
+const supabase = createClient();
+
 export default function SignupPage() {
   const router = useRouter();
-  const supabase = createClient();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -96,7 +97,7 @@ export default function SignupPage() {
                   id="fullName"
                   name="fullName"
                   type="text"
-                  placeholder="John Doe"
+                  placeholder="Meshack Dapaz"
                   required
                   className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 pl-11 text-sm focus:outline-none focus:ring-2 focus:ring-white/40 transition-all text-white placeholder:text-white/20"
                 />

@@ -7,6 +7,8 @@ import { Users, Sparkles, ArrowRight, ArrowUpRight, Crown, CheckCircle2, Loader2
 import { motion } from 'framer-motion';
 import { createClient } from '@/utils/supabase/client';
 
+const supabase = createClient();
+
 export default function LandingPage() {
   const [joinCode, setJoinCode] = useState('');
   const [isJoining, setIsJoining] = useState(false);
@@ -14,7 +16,6 @@ export default function LandingPage() {
   const [isPro, setIsPro] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const router = useRouter();
-  const supabase = createClient();
 
   useEffect(() => {
     async function loadUser() {

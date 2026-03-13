@@ -153,7 +153,7 @@ export default function DashboardPage() {
               </div>
               
               <div className="text-center md:text-left">
-                <h2 className="text-2xl font-serif font-light mb-2">{user.user_metadata?.name || 'Anonymous Host'}</h2>
+                <h2 className="text-2xl font-serif font-light mb-2">{user.user_metadata?.full_name || user.user_metadata?.name || 'Anonymous Host'}</h2>
                 <div className="inline-flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/10 text-sm">
                    <Mail className="w-4 h-4 text-white/50" />
                    <span className="text-white/80">{user.email || 'No email provided'}</span>

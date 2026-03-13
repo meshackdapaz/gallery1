@@ -6,11 +6,12 @@ import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 
+const supabase = createClient();
+
 function LoginContent() {
   const searchParams = useSearchParams();
   const errorParam = searchParams.get('error');
   const router = useRouter();
-  const supabase = createClient();
   const [loading, setLoading] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
