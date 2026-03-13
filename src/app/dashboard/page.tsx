@@ -4,7 +4,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Loader2, Plus, ArrowRight, Image as ImageIcon, Sparkles, User, Mail, Shield, LogOut, Camera, X, Check } from 'lucide-react';
+import { Loader2, Plus, ArrowRight, Image as ImageIcon, Sparkles, User, Mail, Shield, LogOut, Camera, X, Check, Settings, Music } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import Cropper from 'react-easy-crop';
@@ -20,6 +20,8 @@ export default function DashboardPage() {
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [editingEvent, setEditingEvent] = useState<any>(null);
+  const [savingSettings, setSavingSettings] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -103,6 +105,30 @@ export default function DashboardPage() {
     } finally {
       setUploadingAvatar(false);
       if (avatarInputRef.current) avatarInputRef.current.value = '';
+    }
+  };
+
+  const handleUpdateSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingEvent) return;
+    
+    setSavingSettings(true);
+    try {
+      const { error } = await supabase
+        .from('events')
+        .update({
+          background_audio_url: editingEvent.background_audio_url
+        })
+        .eq('id', editingEvent.id);
+      
+      if (error) throw error;
+      
+      setEvents(events.map(ev => ev.id === editingEvent.id ? { ...ev, background_audio_url: editingEvent.background_audio_url } : ev));
+      setEditingEvent(null);
+    } catch (err: any) {
+      alert("Failed to update settings: " + err.message);
+    } finally {
+      setSavingSettings(false);
     }
   };
 
@@ -259,8 +285,19 @@ export default function DashboardPage() {
                     )}
                     
                     <div className="relative z-10 h-full flex flex-col">
-                      <div className="w-12 h-12 bg-black/40 rounded-xl mb-6 flex items-center justify-center border border-white/10 backdrop-blur-md">
-                         <ImageIcon className="w-5 h-5 text-white/70" />
+                      <div className="flex items-center justify-between mb-6">
+                        <div className="w-12 h-12 bg-black/40 rounded-xl flex items-center justify-center border border-white/10 backdrop-blur-md">
+                           <ImageIcon className="w-5 h-5 text-white/70" />
+                        </div>
+                        <button 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setEditingEvent(event);
+                          }}
+                          className="p-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-colors"
+                        >
+                          <Settings className="w-5 h-5 text-white/40" />
+                        </button>
                       </div>
                       
                       <h3 className="text-2xl font-serif font-light mb-2 line-clamp-1 group-hover:text-white transition-colors text-white/90">{event.name}</h3>
@@ -361,6 +398,70 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Settings Modal */}
+      <AnimatePresence>
+        {editingEvent && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-xl"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="glass-card w-full max-w-md p-8 rounded-3xl border border-white/10 bg-white/[0.02]"
+            >
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-2xl font-serif font-light">Gallery Settings</h3>
+                <button onClick={() => setEditingEvent(null)} className="text-white/40 hover:text-white transition-colors">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <form onSubmit={handleUpdateSettings} className="space-y-8">
+                <div>
+                  <label className="text-xs uppercase tracking-widest text-white/40 mb-3 block font-bold">Atmosphere Music (URL)</label>
+                  <div className="relative">
+                    <Music className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
+                    <input 
+                      type="url"
+                      value={editingEvent.background_audio_url || ''}
+                      onChange={(e) => setEditingEvent({ ...editingEvent, background_audio_url: e.target.value })}
+                      placeholder="https://example.com/audio.mp3"
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 outline-none focus:border-white/20 transition-all text-white/80"
+                    />
+                  </div>
+                  <p className="text-[10px] text-white/20 mt-3 flex items-center gap-2">
+                    <Sparkles className="w-3 h-3" /> Tip: Use a direct MP3 link for a peaceful vibe.
+                  </p>
+                </div>
+
+                <div className="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-4">
+                   <div className="flex items-center justify-between">
+                      <span className="text-sm text-white/60">Candle Sanctuary</span>
+                      <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded text-white/40 uppercase tracking-widest font-bold">Enabled</span>
+                   </div>
+                   <div className="flex items-center justify-between">
+                      <span className="text-sm text-white/60">Tribute Guestbook</span>
+                      <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded text-white/40 uppercase tracking-widest font-bold">Enabled</span>
+                   </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={savingSettings}
+                  className="w-full py-4 bg-white text-black font-bold rounded-2xl shadow-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                >
+                  {savingSettings ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Save Changes'}
+                </button>
+              </form>
             </motion.div>
           </motion.div>
         )}

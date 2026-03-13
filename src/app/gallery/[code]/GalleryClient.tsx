@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, use, useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Camera, Upload, Loader2, ArrowLeft, Maximize2, QrCode, Heart, Download, Copy, Archive, Mic, Play, Pause, X, MonitorPlay, Trash2, Flame, MessageSquare, Send } from 'lucide-react';
+import { Camera, Upload, Loader2, ArrowLeft, Maximize2, QrCode, Heart, Download, Copy, Archive, Mic, Play, Pause, X, MonitorPlay, Trash2, Flame, MessageSquare, Send, Clock, Lock, Music, Volume2, VolumeX, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { QRCodeSVG } from 'qrcode.react';
@@ -61,10 +62,16 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
   // Interactive Features State
   const [candles, setCandles] = useState<any[]>([]);
   const [guestbook, setGuestbook] = useState<any[]>([]);
+  const [currentPrompt, setCurrentPrompt] = useState<any>(null);
   const [lightingCandle, setLightingCandle] = useState(false);
   const [showGuestbook, setShowGuestbook] = useState(false);
   const [newMessage, setNewMessage] = useState('');
+  const [unlockAt, setUnlockAt] = useState<string>('');
   const [postingMessage, setPostingMessage] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [isPlayingStory, setIsPlayingStory] = useState(false);
+  const [storyIndex, setStoryIndex] = useState(0);
+  const bgAudioRef = useRef<HTMLAudioElement | null>(null);
   
   // Audio Memo & Upload Modal State
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -136,6 +143,15 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
           .order('created_at', { ascending: false });
         setGuestbook(guestbookData || []);
 
+        // Fetch Daily Prompt
+        const today = new Date().toISOString().split('T')[0];
+        const { data: promptData } = await supabase
+          .from('gallery_prompts')
+          .select('*')
+          .eq('active_date', today)
+          .maybeSingle();
+        setCurrentPrompt(promptData);
+
         // Realtime Setup for Standard Supabase
         const channel = supabase.channel(`gallery_updates_${eventData.id}`)
           .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'photos' }, (payload: any) => {
@@ -168,6 +184,16 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
       supabase.removeAllChannels();
     };
   }, [code, router, event?.id]);
+
+  useEffect(() => {
+    let interval: any;
+    if (isPlayingStory && photos.length > 0) {
+      interval = setInterval(() => {
+        setStoryIndex((prev) => (prev + 1) % photos.length);
+      }, 5000); // 5 seconds per memory
+    }
+    return () => clearInterval(interval);
+  }, [isPlayingStory, photos.length]);
 
   const handleUploadClick = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -333,15 +359,35 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
         event_id: event.id,
         user_id: user.id,
         author_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous',
-        message: newMessage.trim()
+        message: newMessage.trim(),
+        unlock_at: unlockAt || null
       }]);
       if (error) throw error;
       setNewMessage('');
+      setUnlockAt('');
+      setShowGuestbook(false);
     } catch (e) {
       alert('Failed to post tribute.');
     } finally {
       setPostingMessage(false);
     }
+  };
+
+  const isLocked = (unlockAt: string | null) => {
+    if (!unlockAt) return false;
+    return new Date(unlockAt) > new Date();
+  };
+
+  const getUserBadges = (userId: string) => {
+    const userPhotos = photos.filter(p => p.host_id === userId).length;
+    const userReactions = reactions.filter(r => r.user_id === userId).length;
+    const userCandles = candles.filter(c => c.user_id === userId).length;
+    
+    const badges = [];
+    if (userPhotos >= 5) badges.push({ name: 'Top Storyteller', icon: <Camera className="w-3 h-3" /> });
+    if (userReactions >= 10) badges.push({ name: 'Legacy Keeper', icon: <Heart className="w-3 h-3" /> });
+    if (userCandles >= 3) badges.push({ name: 'Heart of Sanctuary', icon: <Flame className="w-3 h-3" /> });
+    return badges;
   };
 
   const getPhotoReactionsCount = (photoId: string) => {
@@ -438,6 +484,17 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
 
   return (
     <div className="min-h-screen bg-black text-white p-6 relative overflow-hidden">
+      {/* Background Audio */}
+      {event?.background_audio_url && (
+        <audio 
+          ref={bgAudioRef} 
+          src={event.background_audio_url} 
+          loop 
+          muted={isMuted} 
+          autoPlay 
+        />
+      )}
+
       {/* Dynamic Background Glows based on Event Type */}
       <div className={`absolute top-[-10%] left-[-10%] w-[500px] h-[500px] ${theme.bgGlow1} rounded-full blur-[120px] pointer-events-none transition-colors duration-1000`} />
       <div className={`absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] ${theme.bgGlow2} rounded-full blur-[150px] pointer-events-none transition-colors duration-1000`} />
@@ -460,6 +517,28 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
         </div>
 
         <div className="flex items-center gap-3">
+          <button 
+            onClick={() => {
+              setIsPlayingStory(true);
+              setIsMuted(false);
+              setStoryIndex(0);
+            }}
+            disabled={photos.length === 0}
+            className="btn-secondary flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors border border-white/10"
+          >
+            <Play className="w-5 h-5" />
+            <span className="hidden sm:inline">Play Story</span>
+          </button>
+
+          {event?.background_audio_url && (
+            <button 
+              onClick={() => setIsMuted(!isMuted)}
+              className="p-2.5 bg-white/10 hover:bg-white/20 rounded-full transition-colors border border-white/10"
+            >
+              {isMuted ? <VolumeX className="w-5 h-5 text-white/40" /> : <Volume2 className="w-5 h-5 text-white animate-pulse" />}
+            </button>
+          )}
+
           {isHost && photos.length > 0 && (
             <>
               <Link
@@ -622,6 +701,34 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
               {showGuestbook ? 'Close' : 'Write a Tribute'}
             </button>
           </div>
+          
+          {/* Daily Prompt Callout */}
+          {currentPrompt && !showGuestbook && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="glass-card p-6 mb-12 border border-amber-500/10 bg-amber-500/[0.03] flex flex-col md:flex-row items-center justify-between gap-6"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center border border-amber-500/20">
+                  <Sparkles className="w-6 h-6 text-amber-500" />
+                </div>
+                <div>
+                  <h4 className="text-xs uppercase tracking-widest text-amber-500/60 font-bold mb-1">Daily Memory Prompt</h4>
+                  <p className="text-white/80 font-serif italic text-lg">{currentPrompt.prompt_text}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  setShowGuestbook(true);
+                  setNewMessage(`Replying to prompt: ${currentPrompt.prompt_text}\n\n`);
+                }}
+                className="btn-secondary py-2.5 px-6 rounded-full border-amber-500/20 text-amber-500 hover:bg-amber-500/10 text-xs font-bold uppercase tracking-widest"
+              >
+                Share Memory
+              </button>
+            </motion.div>
+          )}
 
           {showGuestbook && (
             <div className="glass-card p-6 mb-12 border border-white/20 bg-white/5">
@@ -629,31 +736,65 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Write your heart here..."
-                className="w-full bg-transparent border-none outline-none text-white placeholder:text-white/20 resize-none h-32 mb-4"
+                className="w-full bg-transparent border-none outline-none text-white placeholder:text-white/20 resize-none h-32 mb-6"
               />
-              <div className="flex justify-end">
+              
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-6 border-t border-white/10 text-sm">
+                <div className="flex items-center gap-4 text-white/40">
+                  <Clock className="w-5 h-5" />
+                  <span>Time Capsule: Unlock on anniversary? (Optional)</span>
+                  <input 
+                    type="date" 
+                    value={unlockAt}
+                    onChange={(e) => setUnlockAt(e.target.value)}
+                    className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white outline-none"
+                  />
+                </div>
+                
                 <button 
                   onClick={handlePostTribute}
                   disabled={postingMessage || !newMessage.trim()}
-                  className="btn-primary flex items-center gap-2 px-8 py-3 rounded-full"
+                  className="btn-primary flex items-center gap-2 px-8 py-3 rounded-full w-full md:w-auto"
                 >
                   {postingMessage ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                  <span>Post Tribute</span>
+                  <span>{unlockAt ? 'Lock Time Capsule' : 'Post Tribute'}</span>
                 </button>
               </div>
             </div>
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {guestbook.map((tribute) => (
-              <div key={tribute.id} className="glass-card p-6 border border-white/5 bg-white/[0.02]">
-                <p className="text-white/80 italic mb-6 leading-relaxed">"{tribute.message}"</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-widest text-white/40">— {tribute.author_name}</span>
-                  <span className="text-[10px] text-white/20 font-mono">{new Date(tribute.created_at).toLocaleDateString()}</span>
+            {guestbook.map((tribute) => {
+              const locked = isLocked(tribute.unlock_at);
+              return (
+                <div key={tribute.id} className={`glass-card p-6 border transition-all ${locked ? 'border-amber-500/20 bg-amber-500/[0.02] opacity-60' : 'border-white/5 bg-white/[0.02]'}`}>
+                  {locked ? (
+                    <div className="flex flex-col items-center text-center py-4">
+                      <Lock className="w-8 h-8 text-amber-500/40 mb-3" />
+                      <p className="text-amber-500/60 font-serif italic mb-2">Time Capsule Locked</p>
+                      <p className="text-[10px] uppercase tracking-widest text-white/20">Unlocks on {new Date(tribute.unlock_at).toLocaleDateString()}</p>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-white/80 italic mb-6 leading-relaxed">"{tribute.message}"</p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-2">
+                           <span className="text-xs font-bold uppercase tracking-widest text-white/40">— {tribute.author_name}</span>
+                           <div className="flex gap-1">
+                              {getUserBadges(tribute.user_id).map((badge, bIdx) => (
+                                <div key={bIdx} title={badge.name} className="bg-white/10 p-1 rounded flex items-center justify-center text-white/40 hover:text-white transition-colors">
+                                   {badge.icon}
+                                </div>
+                              ))}
+                           </div>
+                        </div>
+                        <span className="text-[10px] text-white/20 font-mono">{new Date(tribute.created_at).toLocaleDateString()}</span>
+                      </div>
+                    </>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       </main>
@@ -788,6 +929,59 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
           </div>
         </div>
       )}
+
+      {/* AI Memory Story Slideshow Modal */}
+      <AnimatePresence>
+        {isPlayingStory && photos.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-6 md:p-12"
+          >
+            <button 
+              onClick={() => setIsPlayingStory(false)}
+              className="absolute top-8 right-8 text-white/40 hover:text-white transition-colors z-[110]"
+            >
+              <X className="w-8 h-8" />
+            </button>
+
+            <motion.div 
+              key={photos[storyIndex].id}
+              initial={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
+              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, scale: 1.1, filter: 'blur(10px)' }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              className="relative w-full max-w-5xl h-full flex flex-col items-center justify-center"
+            >
+              <img 
+                src={photos[storyIndex].url} 
+                alt="Memory Story"
+                className="max-w-full max-h-[70vh] object-contain rounded-2xl shadow-[0_0_100px_rgba(255,255,255,0.1)]"
+              />
+              
+              <div className="absolute bottom-0 text-center max-w-2xl px-6">
+                 <p className="text-2xl md:text-3xl font-serif font-light text-white italic drop-shadow-2xl">
+                    "{photos[storyIndex].ai_caption || 'A beautiful memory shared.'}"
+                 </p>
+                 <div className="mt-8 flex items-center justify-center gap-4">
+                    <span className="text-[10px] uppercase tracking-[0.4em] text-white/30">Memory {storyIndex + 1} of {photos.length}</span>
+                 </div>
+              </div>
+            </motion.div>
+
+            {/* Progress indicator */}
+            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-1 items-center">
+               {photos.map((_, idx) => (
+                 <div 
+                   key={idx} 
+                   className={`h-1 transition-all duration-1000 ${idx === storyIndex ? 'w-8 bg-white' : 'w-2 bg-white/10'}`} 
+                 />
+               ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Decorative Blur */}
       <div className="fixed bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent pointer-events-none" />
