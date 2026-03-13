@@ -15,7 +15,7 @@ const config: CapacitorConfig = {
   server: {
     hostname: 'memorial-gallery.meshackdapaz.com',
     androidScheme: 'https',
-    iosScheme: 'https',
+    iosScheme: 'capacitor',
     allowNavigation: [
       'wyhqxaicpxhdltezfmay.supabase.co'
     ]
