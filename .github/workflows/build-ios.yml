@@ -30,16 +30,24 @@ jobs:
 
       - name: Sync Capacitor iOS
         run: |
-          rm -rf ios
           npx cap add ios
           npx cap sync ios
+          cd ios/App && pod install
+
+      - name: Debug iOS Project
+        run: find ios -maxdepth 4 -name "*.xcworkspace" -o -name "*.xcodeproj"
 
       - name: Build Unsigned IPA
         run: |
           cd ios/App
-          # Build the archive without signing
-          xcodebuild -workspace App.xcworkspace \
-            -scheme App \
+          # If workspace exists, use it, otherwise use project
+          if [ -d "App.xcworkspace" ]; then
+            BUILD_CMD="-workspace App.xcworkspace -scheme App"
+          else
+            BUILD_CMD="-project App.xcodeproj -scheme App"
+          fi
+
+          xcodebuild $BUILD_CMD \
             -configuration Release \
             -destination "generic/platform=iOS" \
             -archivePath $PWD/build/App.xcarchive \
