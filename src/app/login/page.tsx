@@ -62,19 +62,14 @@ function LoginContent() {
     if (error) {
       setLocalError('Could not sign up user');
       setLoading(false);
-    } else {
-      router.push('/dashboard');
-    }
-  };
-
   return (
-    <div className="w-full max-w-md relative z-10">
+    <div className="w-full max-w-md relative z-10 px-6">
       <div className="text-center mb-10">
         <div className="w-16 h-16 glass flex items-center justify-center mb-6 mx-auto rounded-2xl border border-white/10 shadow-[0_0_30px_rgba(255,255,255,0.05)]">
-          <Camera className="w-8 h-8 text-white/80" />
+          <Lock className="w-8 h-8 text-white/80" />
         </div>
-        <h1 className="text-3xl font-light tracking-tight font-serif mb-2">Welcome Back</h1>
-        <p className="text-fg-secondary text-sm">Sign in or create an account to host galleries.</p>
+        <h1 className="text-3xl font-light tracking-tight font-serif mb-2">Login</h1>
+        <p className="text-white/40 text-sm">Welcome back to your sanctuary.</p>
       </div>
 
       <div className="glass-card p-8 rounded-3xl border border-white/10 bg-white/[0.02] shadow-2xl backdrop-blur-md">
@@ -85,20 +80,6 @@ function LoginContent() {
               {error || localError}
             </div>
           )}
-
-          <div>
-            <label className="text-xs uppercase tracking-widest text-white/50 block mb-2 font-mono" htmlFor="fullName">Full Name (For Signup)</label>
-            <div className="relative">
-              <input
-                id="fullName"
-                name="fullName"
-                type="text"
-                placeholder="John Doe"
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 pl-11 text-sm focus:outline-none focus:ring-2 focus:ring-white/40 transition-all text-white placeholder:text-white/20"
-              />
-              <User className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
-            </div>
-          </div>
 
           <div>
             <label className="text-xs uppercase tracking-widest text-white/50 block mb-2 font-mono" htmlFor="email">Email</label>
@@ -130,13 +111,14 @@ function LoginContent() {
             </div>
           </div>
 
-          <div className="flex gap-4 mt-4">
-            <button type="submit" disabled={loading} className="flex-1 btn-primary py-3 rounded-xl tracking-wide font-medium flex items-center justify-center gap-2">
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Log In'}
-            </button>
-            <button type="button" onClick={handleSignup} disabled={loading} className="flex-1 btn-secondary py-3 rounded-xl tracking-wide font-medium flex items-center justify-center gap-2">
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sign Up'}
-            </button>
+          <button type="submit" disabled={loading} className="w-full bg-white text-black py-3 rounded-xl tracking-wide font-bold flex items-center justify-center gap-2 hover:bg-gray-100 transition-all active:scale-[0.98]">
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Log In'}
+          </button>
+
+          <div className="text-center mt-2">
+            <Link href="/signup" className="text-sm text-white/40 hover:text-white transition-colors">
+              Don't have an account? <span className="text-white font-medium underline decoration-white/20">Sign Up</span>
+            </Link>
           </div>
         </form>
       </div>

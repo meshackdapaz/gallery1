@@ -54,7 +54,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-black text-white app-container">
+    <div className="h-screen flex flex-col items-center bg-black text-white app-container overflow-hidden">
       {/* Background Ambience */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 right-[-10%] w-[120vw] h-[120vw] md:w-[60rem] md:h-[60rem] bg-white/[0.02] rounded-full blur-[120px] translate-x-1/2 -translate-y-1/2" />
@@ -65,13 +65,10 @@ export default function LandingPage() {
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="w-full max-w-[1280px] flex flex-col items-center z-10 py-12 md:py-24 pb-32 md:pb-40"
+        className="w-full max-w-[1280px] flex-1 flex flex-col items-center justify-center z-10 py-6 md:py-12"
       >
         {/* Branding Section */}
-        <motion.section variants={itemVariants} className="flex flex-col items-center mb-16 md:mb-24 text-center w-full focus:outline-none">
-          <div className="w-20 md:w-28 aspect-square glass flex items-center justify-center mb-6 md:mb-10 rounded-2xl md:rounded-[2rem] border border-white/10 shadow-[0_0_40px_rgba(255,255,255,0.05)]">
-            <span className="text-3xl md:text-5xl font-serif italic text-white/90">V</span>
-          </div>
+        <motion.section variants={itemVariants} className="flex flex-col items-center mb-12 md:mb-16 text-center w-full focus:outline-none">
           
           <h1 className="title font-serif font-light tracking-tighter leading-[1.1] mb-6 outline-none">
             MEMORIAL<br /><span className="text-white/40 italic">GALLERY</span>

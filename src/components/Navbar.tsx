@@ -27,11 +27,6 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Branding - Top Center */}
-      <div className="fixed top-0 left-0 right-0 flex justify-center py-6 z-50 pointer-events-none">
-        <Link href="/" className="font-serif italic text-2xl pointer-events-auto bg-black/20 backdrop-blur-sm rounded-full px-4 border border-white/5">V</Link>
-      </div>
-
       {/* Navigation - Bottom */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] flex justify-center pointer-events-none">
         <div className="flex gap-4 pointer-events-auto glass-card border border-white/10 rounded-full px-6 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.5)] bg-black/40 backdrop-blur-xl">
