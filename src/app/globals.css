@@ -26,6 +26,57 @@
   }
 }
 
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.app-container {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.signin-btn {
+  margin-right: 12px;
+  white-space: nowrap;
+}
+
+.title {
+  font-size: clamp(28px, 6vw, 42px);
+  text-align: center;
+}
+
+.card {
+  width: 100%;
+  max-width: 100%;
+  margin: 16px 0;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.container {
+  width: 100%;
+  max-width: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
 @layer components {
   .glass {
     @apply bg-white/5 border border-white/10 backdrop-blur-md rounded-2xl;

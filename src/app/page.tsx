@@ -54,7 +54,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-black text-white relative overflow-x-hidden pt-[env(safe-area-inset-top,2rem)] pb-[env(safe-area-inset-bottom,2rem)] px-[env(safe-area-inset-left,1.5rem)] px-[env(safe-area-inset-right,1.5rem)] lg:px-12">
+    <div className="min-h-screen flex flex-col items-center bg-black text-white app-container">
       {/* Background Ambience */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 right-[-10%] w-[120vw] h-[120vw] md:w-[60rem] md:h-[60rem] bg-white/[0.02] rounded-full blur-[120px] translate-x-1/2 -translate-y-1/2" />
@@ -69,24 +69,24 @@ export default function LandingPage() {
       >
         {/* Branding Section */}
         <motion.section variants={itemVariants} className="flex flex-col items-center mb-16 md:mb-24 text-center w-full">
-          <div className="w-20 s-phone:w-16 md:w-28 aspect-square glass flex items-center justify-center mb-6 md:mb-10 rounded-2xl md:rounded-[2rem] border border-white/10 shadow-[0_0_40px_rgba(255,255,255,0.05)]">
+          <div className="w-20 md:w-28 aspect-square glass flex items-center justify-center mb-6 md:mb-10 rounded-2xl md:rounded-[2rem] border border-white/10 shadow-[0_0_40px_rgba(255,255,255,0.05)]">
             <span className="text-3xl md:text-5xl font-serif italic text-white/90">V</span>
           </div>
           
-          <h1 className="text-[clamp(2.5rem,8vw,5.5rem)] font-light tracking-tighter mb-4 md:mb-6 leading-[1.1] font-serif">
+          <h1 className="title font-serif font-light tracking-tighter leading-[1.1] mb-6">
             MEMORIAL<br /><span className="text-white/40 italic">GALLERY</span>
           </h1>
           
-          <p className="text-white/60 text-base md:text-xl max-w-[90%] md:max-w-[48rem] mx-auto font-light leading-relaxed px-4">
+          <p className="text-white/60 text-base md:text-xl max-w-[90%] md:max-w-[48rem] mx-auto font-light leading-relaxed px-4 text-balance">
             Curate life's most precious perspectives in a shared, real-time sanctuary.
           </p>
         </motion.section>
 
         {/* Dynamic Grid: Adaptive based on manifesto widths */}
-        <motion.section variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 w-full max-w-[800px] mx-auto px-4">
+        <motion.section variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 w-full max-w-[800px] mx-auto">
           {/* Host Action */}
-          <Link href="/host" className="group">
-            <div className="glass-card flex flex-col p-6 md:p-10 border border-white/5 hover:border-white/20 transition-all duration-500 h-full hover:bg-white/[0.03]">
+          <Link href="/host" className="group w-full">
+            <div className="card glass-card flex flex-col border border-white/5 hover:border-white/20 transition-all duration-500 h-full hover:bg-white/[0.03]">
               <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 border border-white/10">
                 <Users className="w-5 h-5 text-white/80" />
               </div>
@@ -101,7 +101,7 @@ export default function LandingPage() {
           </Link>
 
           {/* Join Action */}
-          <div className="glass-card flex flex-col p-6 md:p-10 border border-white/5 h-full">
+          <div className="card glass-card flex flex-col border border-white/5 h-full">
             <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center mb-6 border border-white/10">
               <Sparkles className="w-5 h-5 text-white/80" />
             </div>

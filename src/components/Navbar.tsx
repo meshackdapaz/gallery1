@@ -26,11 +26,11 @@ export default function Navbar() {
   }, [supabase.auth]);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 p-4 px-[env(safe-area-inset-left,1rem)] px-[env(safe-area-inset-right,1rem)] flex justify-between items-center z-50 pointer-events-none">
+    <nav className="fixed top-0 left-0 right-0 z-50 pointer-events-none header app-container">
       <Link href="/" className="font-serif italic text-xl pointer-events-auto">V</Link>
       <div className="flex gap-4 pointer-events-auto">
         {!user ? (
-          <div className="flex gap-2 text-sm font-semibold">
+          <div className="flex gap-2 text-sm font-semibold signin-btn">
             <Link href="/login" className="bg-white hover:bg-white/90 transition-colors rounded-full px-4 py-2 text-black cursor-pointer flex items-center gap-2">
               <LogIn className="w-4 h-4" /> Sign In
             </Link>
