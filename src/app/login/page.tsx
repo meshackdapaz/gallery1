@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState, Suspense } from 'react';
-import { Camera, Mail, Lock, User, Loader2 } from 'lucide-react';
+import { Lock, Mail, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 
 function LoginContent() {
   const searchParams = useSearchParams();
-  const error = searchParams.get('error');
+  const errorParam = searchParams.get('error');
   const router = useRouter();
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
@@ -23,45 +23,16 @@ function LoginContent() {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-      setLocalError('Could not authenticate user');
+    if (signInError) {
+      setLocalError(signInError.message);
       setLoading(false);
     } else {
       router.push('/dashboard');
     }
   };
 
-  const handleSignup = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    const form = (e.currentTarget.closest('form') as HTMLFormElement);
-    if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-    }
-
-    setLoading(true);
-    setLocalError(null);
-    
-    const formData = new FormData(form);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const fullName = formData.get('fullName') as string;
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name: fullName,
-        }
-      }
-    });
-
-    if (error) {
-      setLocalError('Could not sign up user');
-      setLoading(false);
   return (
     <div className="w-full max-w-md relative z-10 px-6">
       <div className="text-center mb-10">
@@ -75,9 +46,9 @@ function LoginContent() {
       <div className="glass-card p-8 rounded-3xl border border-white/10 bg-white/[0.02] shadow-2xl backdrop-blur-md">
         <form onSubmit={handleLogin} className="flex flex-col gap-6">
           
-          {(error || localError) && (
+          {(errorParam || localError) && (
             <div className="bg-rose-500/10 text-rose-500 text-sm p-3 rounded-lg border border-rose-500/20 text-center">
-              {error || localError}
+              {errorParam || localError}
             </div>
           )}
 
