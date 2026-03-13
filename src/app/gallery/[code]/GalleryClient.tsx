@@ -58,29 +58,12 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
   const [copied, setCopied] = useState(false);
   const [downloadingZip, setDownloadingZip] = useState(false);
   const [deletingEvent, setDeletingEvent] = useState(false);
-  
-  // Interactive Features State
-  const [candles, setCandles] = useState<any[]>([]);
-  const [guestbook, setGuestbook] = useState<any[]>([]);
-  const [currentPrompt, setCurrentPrompt] = useState<any>(null);
-  const [lightingCandle, setLightingCandle] = useState(false);
-  const [showGuestbook, setShowGuestbook] = useState(false);
-  const [newMessage, setNewMessage] = useState('');
-  const [unlockAt, setUnlockAt] = useState<string>('');
-  const [postingMessage, setPostingMessage] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [isPlayingStory, setIsPlayingStory] = useState(false);
   const [storyIndex, setStoryIndex] = useState(0);
   const bgAudioRef = useRef<HTMLAudioElement | null>(null);
   
-  // Audio Memo & Upload Modal State
-  const [pendingFile, setPendingFile] = useState<File | null>(null);
-  const [pendingPreview, setPendingPreview] = useState<string | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const router = useRouter();
@@ -128,29 +111,6 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
           setReactions(reactionData || []);
         }
 
-        // Fetch Candles
-        const { data: candleData } = await supabase
-          .from('gallery_candles')
-          .select('*')
-          .eq('event_id', eventData.id);
-        setCandles(candleData || []);
-
-        // Fetch Guestbook
-        const { data: guestbookData } = await supabase
-          .from('gallery_guestbook')
-          .select('*')
-          .eq('event_id', eventData.id)
-          .order('created_at', { ascending: false });
-        setGuestbook(guestbookData || []);
-
-        // Fetch Daily Prompt
-        const today = new Date().toISOString().split('T')[0];
-        const { data: promptData } = await supabase
-          .from('gallery_prompts')
-          .select('*')
-          .eq('active_date', today)
-          .maybeSingle();
-        setCurrentPrompt(promptData);
 
         // Realtime Setup for Standard Supabase
         const channel = supabase.channel(`gallery_updates_${eventData.id}`)
@@ -162,12 +122,6 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
           })
           .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'photo_reactions' }, (payload: any) => {
              setReactions((prev) => [...prev, payload.new]);
-          })
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'gallery_candles' }, (payload: any) => {
-             setCandles((prev) => [...prev, payload.new]);
-          })
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'gallery_guestbook' }, (payload: any) => {
-             setGuestbook((prev) => [payload.new, ...prev]);
           })
           .subscribe();
 
@@ -195,107 +149,6 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
     return () => clearInterval(interval);
   }, [isPlayingStory, photos.length]);
 
-  const handleUploadClick = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !event) return;
-    setPendingFile(file);
-    setPendingPreview(URL.createObjectURL(file));
-    setAudioBlob(null);
-    e.target.value = '';
-  };
-
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunksRef.current.push(e.data);
-      };
-
-      mediaRecorder.onstop = () => {
-        const audioBlobData = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        setAudioBlob(audioBlobData);
-        stream.getTracks().forEach(track => track.stop());
-      };
-
-      mediaRecorder.start();
-      setIsRecording(true);
-    } catch (err) {
-      console.error("Error accessing microphone:", err);
-      alert("Could not access microphone.");
-    }
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-    }
-  };
-
-  const confirmUpload = async () => {
-    if (!pendingFile || !event) return;
-
-    setUploading(true);
-    try {
-      const fileExt = pendingFile.name.split('.').pop() || 'jpg';
-      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
-      const filePath = `events/${event.id}/${fileName}`;
-
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('memorial-photos')
-        .upload(filePath, pendingFile);
-
-      if (uploadError) throw uploadError;
-
-      const { data: publicUrlData } = supabase.storage
-        .from('memorial-photos')
-        .getPublicUrl(uploadData.path);
-        
-      let publicAudioUrl = null;
-      
-      // Upload Audio Blob if present
-      if (audioBlob) {
-        const audioFileName = `audio_${Math.random().toString(36).substring(2, 15)}_${Date.now()}.webm`;
-        const audioFilePath = `events/${event.id}/audio/${audioFileName}`;
-        
-        const { error: audioUploadError } = await supabase.storage
-          .from('memorial-photos')
-          .upload(audioFilePath, audioBlob);
-          
-        if (!audioUploadError) {
-           const { data: audioUrlData } = supabase.storage.from('memorial-photos').getPublicUrl(audioFilePath);
-           publicAudioUrl = audioUrlData.publicUrl;
-        }
-      }
-
-      // Generate AI Caption (TEMPORARILY DISABLED)
-      let aiCaption = 'A beautiful memory uploaded to standard Supabase.';
-
-      const { error: dbError } = await supabase
-        .from('photos')
-        .insert([{
-          url: publicUrlData.publicUrl,
-          event_id: event.id,
-          aspect_ratio: 1,
-          ai_caption: aiCaption,
-          audio_url: publicAudioUrl
-        }]);
-
-      if (dbError) throw dbError;
-    } catch (error) {
-      console.error('Error uploading photo:', error);
-      alert('Failed to upload photo.');
-    } finally {
-      setUploading(false);
-      setPendingFile(null);
-      setPendingPreview(null);
-      setAudioBlob(null);
-    }
-  };
 
   const toggleAudio = (e: React.MouseEvent, photoId: string, audioUrl: string) => {
     e.stopPropagation();
@@ -336,59 +189,7 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
     }
   };
 
-  const handleLightCandle = async () => {
-    if (!user) {
-      alert('Please sign in to light a candle.');
-      return;
-    }
-    setLightingCandle(true);
-    try {
-      await supabase.from('gallery_candles').insert([{ event_id: event.id, user_id: user.id }]);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLightingCandle(false);
-    }
-  };
 
-  const handlePostTribute = async () => {
-    if (!user || !newMessage.trim()) return;
-    setPostingMessage(true);
-    try {
-      const { error } = await supabase.from('gallery_guestbook').insert([{
-        event_id: event.id,
-        user_id: user.id,
-        author_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous',
-        message: newMessage.trim(),
-        unlock_at: unlockAt || null
-      }]);
-      if (error) throw error;
-      setNewMessage('');
-      setUnlockAt('');
-      setShowGuestbook(false);
-    } catch (e) {
-      alert('Failed to post tribute.');
-    } finally {
-      setPostingMessage(false);
-    }
-  };
-
-  const isLocked = (unlockAt: string | null) => {
-    if (!unlockAt) return false;
-    return new Date(unlockAt) > new Date();
-  };
-
-  const getUserBadges = (userId: string) => {
-    const userPhotos = photos.filter(p => p.host_id === userId).length;
-    const userReactions = reactions.filter(r => r.user_id === userId).length;
-    const userCandles = candles.filter(c => c.user_id === userId).length;
-    
-    const badges = [];
-    if (userPhotos >= 5) badges.push({ name: 'Top Storyteller', icon: <Camera className="w-3 h-3" /> });
-    if (userReactions >= 10) badges.push({ name: 'Legacy Keeper', icon: <Heart className="w-3 h-3" /> });
-    if (userCandles >= 3) badges.push({ name: 'Heart of Sanctuary', icon: <Flame className="w-3 h-3" /> });
-    return badges;
-  };
 
   const getPhotoReactionsCount = (photoId: string) => {
     return reactions.filter(r => r.photo_id === photoId).length;
@@ -483,7 +284,7 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
   const isDeveloping = event?.is_disposable_mode && event?.reveal_time && new Date() < new Date(event.reveal_time) && !isHost;
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-black text-white p-6 relative overflow-x-hidden">
       {/* Background Audio */}
       {event?.background_audio_url && (
         <audio 
@@ -568,53 +369,16 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
             </>
           )}
 
-          <label className="btn-secondary flex items-center gap-2 cursor-pointer whitespace-nowrap px-4 py-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors border border-white/10">
+          <Link 
+            href={`/booth/${code}`}
+            className="btn-primary flex items-center gap-2 px-8 py-2.5 rounded-full font-bold shadow-xl shadow-white/5 border border-white/20 hover:scale-105 transition-all text-white"
+          >
             <Camera className="w-5 h-5" />
-            <span className="hidden sm:inline">Quick Camera</span>
-            <input type="file" className="hidden" accept="image/*" capture="environment" onChange={handleUploadClick} disabled={uploading} />
-          </label>
-          <label className="btn-primary flex items-center gap-2 cursor-pointer whitespace-nowrap px-6 py-2.5 rounded-full font-medium">
-            <Upload className="w-5 h-5" />
-            <span>Upload Photo</span>
-            <input type="file" className="hidden" accept="image/*" onChange={handleUploadClick} disabled={uploading} />
-          </label>
+            <span>Memory Booth</span>
+          </Link>
         </div>
       </header>
       
-      {/* Sanctuary Section: Digital Candles */}
-      <section className="relative z-10 max-w-6xl mx-auto mb-12">
-        <div className="glass-card p-8 flex flex-col md:flex-row items-center justify-between gap-8 border border-white/10 bg-gradient-to-br from-white/[0.05] to-transparent overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-[80px] pointer-events-none" />
-          
-          <div className="flex-1 text-center md:text-left">
-            <h2 className="text-2xl font-serif font-medium mb-2 flex items-center justify-center md:justify-start gap-3">
-              <Flame className="w-6 h-6 text-amber-400" /> Digital Candle Sanctuary
-            </h2>
-            <p className="text-white/40 max-w-md">Lighting a virtual candle is a small but powerful way to show your presence and support. Each flame represents a shared memory.</p>
-          </div>
-
-          <div className="flex flex-col items-center gap-4">
-            <div className="flex items-center gap-6">
-              <div className="text-center">
-                <div className="text-3xl font-serif font-bold text-white">{candles.length}</div>
-                <div className="text-[10px] uppercase tracking-widest text-white/30">Candles Lit</div>
-              </div>
-              <div className="w-px h-10 bg-white/10" />
-              <button 
-                onClick={handleLightCandle}
-                disabled={lightingCandle}
-                className={`group relative flex items-center justify-center p-6 rounded-full transition-all border ${
-                  lightingCandle ? 'bg-amber-500/20 border-amber-500/40 text-amber-500' : 'bg-white/5 border-white/10 hover:border-amber-500/40 hover:bg-amber-500/10'
-                }`}
-              >
-                <Flame className={`w-8 h-8 transition-all ${lightingCandle ? 'animate-bounce' : 'group-hover:scale-125'}`} />
-                {lightingCandle && <Loader2 className="absolute inset-0 w-full h-full animate-spin opacity-20" />}
-              </button>
-            </div>
-            <span className="text-[10px] uppercase tracking-widest text-white/30 font-bold">Press to light a flame</span>
-          </div>
-        </div>
-      </section>
       
       <main className="relative z-10 max-w-6xl mx-auto">
         {isDeveloping ? (
@@ -671,13 +435,6 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
                         {playingAudioId === photo.id ? <Pause className="w-4 h-4 text-black" /> : <Play className="w-4 h-4 text-black ml-0.5" />}
                       </button>
                     )}
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); handleReaction(photo.id); }}
-                      className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full hover:bg-white/20 transition-all border border-white/5"
-                    >
-                      <Heart className="w-4 h-4 text-rose-500 fill-rose-500/50 group-hover:scale-110 transition-transform" />
-                      <span className="text-xs font-bold font-mono">{getPhotoReactionsCount(photo.id)}</span>
-                    </button>
                   </div>
                 </div>
               </div>
@@ -685,118 +442,6 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
           </div>
         )}
 
-        {/* Guestbook / Tribute Wall */}
-        <section className="mt-24 pb-32">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl font-serif font-medium flex items-center gap-3">
-                <MessageSquare className="w-6 h-6 text-white/60" /> Tribute Guestbook
-              </h2>
-              <p className="text-white/40 text-sm mt-1">Leave a message of love, a favorite quote, or a simple prayer.</p>
-            </div>
-            <button 
-              onClick={() => setShowGuestbook(!showGuestbook)}
-              className="text-sm font-bold uppercase tracking-widest text-white/60 hover:text-white transition-colors"
-            >
-              {showGuestbook ? 'Close' : 'Write a Tribute'}
-            </button>
-          </div>
-          
-          {/* Daily Prompt Callout */}
-          {currentPrompt && !showGuestbook && (
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="glass-card p-6 mb-12 border border-amber-500/10 bg-amber-500/[0.03] flex flex-col md:flex-row items-center justify-between gap-6"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center border border-amber-500/20">
-                  <Sparkles className="w-6 h-6 text-amber-500" />
-                </div>
-                <div>
-                  <h4 className="text-xs uppercase tracking-widest text-amber-500/60 font-bold mb-1">Daily Memory Prompt</h4>
-                  <p className="text-white/80 font-serif italic text-lg">{currentPrompt.prompt_text}</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => {
-                  setShowGuestbook(true);
-                  setNewMessage(`Replying to prompt: ${currentPrompt.prompt_text}\n\n`);
-                }}
-                className="btn-secondary py-2.5 px-6 rounded-full border-amber-500/20 text-amber-500 hover:bg-amber-500/10 text-xs font-bold uppercase tracking-widest"
-              >
-                Share Memory
-              </button>
-            </motion.div>
-          )}
-
-          {showGuestbook && (
-            <div className="glass-card p-6 mb-12 border border-white/20 bg-white/5">
-              <textarea 
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Write your heart here..."
-                className="w-full bg-transparent border-none outline-none text-white placeholder:text-white/20 resize-none h-32 mb-6"
-              />
-              
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-6 border-t border-white/10 text-sm">
-                <div className="flex items-center gap-4 text-white/40">
-                  <Clock className="w-5 h-5" />
-                  <span>Time Capsule: Unlock on anniversary? (Optional)</span>
-                  <input 
-                    type="date" 
-                    value={unlockAt}
-                    onChange={(e) => setUnlockAt(e.target.value)}
-                    className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white outline-none"
-                  />
-                </div>
-                
-                <button 
-                  onClick={handlePostTribute}
-                  disabled={postingMessage || !newMessage.trim()}
-                  className="btn-primary flex items-center gap-2 px-8 py-3 rounded-full w-full md:w-auto"
-                >
-                  {postingMessage ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                  <span>{unlockAt ? 'Lock Time Capsule' : 'Post Tribute'}</span>
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {guestbook.map((tribute) => {
-              const locked = isLocked(tribute.unlock_at);
-              return (
-                <div key={tribute.id} className={`glass-card p-6 border transition-all ${locked ? 'border-amber-500/20 bg-amber-500/[0.02] opacity-60' : 'border-white/5 bg-white/[0.02]'}`}>
-                  {locked ? (
-                    <div className="flex flex-col items-center text-center py-4">
-                      <Lock className="w-8 h-8 text-amber-500/40 mb-3" />
-                      <p className="text-amber-500/60 font-serif italic mb-2">Time Capsule Locked</p>
-                      <p className="text-[10px] uppercase tracking-widest text-white/20">Unlocks on {new Date(tribute.unlock_at).toLocaleDateString()}</p>
-                    </div>
-                  ) : (
-                    <>
-                      <p className="text-white/80 italic mb-6 leading-relaxed">"{tribute.message}"</p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex flex-col gap-2">
-                           <span className="text-xs font-bold uppercase tracking-widest text-white/40">— {tribute.author_name}</span>
-                           <div className="flex gap-1">
-                              {getUserBadges(tribute.user_id).map((badge, bIdx) => (
-                                <div key={bIdx} title={badge.name} className="bg-white/10 p-1 rounded flex items-center justify-center text-white/40 hover:text-white transition-colors">
-                                   {badge.icon}
-                                </div>
-                              ))}
-                           </div>
-                        </div>
-                        <span className="text-[10px] text-white/20 font-mono">{new Date(tribute.created_at).toLocaleDateString()}</span>
-                      </div>
-                    </>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </section>
       </main>
 
       {/* QR Code Modal */}
@@ -863,72 +508,12 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
                     <span className="font-medium">{playingAudioId === activePhoto.id ? 'Playing...' : 'Voice Note'}</span>
                   </button>
                 )}
-                <button 
-                  onClick={() => handleReaction(activePhoto.id)}
-                  className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full hover:bg-white/20 transition-colors shrink-0"
-                >
-                  <Heart className="w-5 h-5 text-rose-500 fill-rose-500/50" />
-                  <span className="font-bold font-mono text-lg">{getPhotoReactionsCount(activePhoto.id)}</span>
-                </button>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Upload Preview & Audio Memo Modal */}
-      {pendingPreview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-sm">
-          <div className="glass-card p-6 flex flex-col items-center max-w-sm w-full relative">
-            <button 
-              onClick={() => { setPendingFile(null); setPendingPreview(null); setAudioBlob(null); }}
-              className="absolute top-4 right-4 p-2 bg-black/40 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <h3 className="text-xl font-bold mb-4">Confirm Upload</h3>
-            <img src={pendingPreview} alt="Preview" className="w-full h-64 object-cover rounded-xl mb-6 shadow-xl border border-white/10" />
-            
-            <div className="w-full mb-6">
-              <label className="text-sm text-fg-secondary mb-2 block font-medium">Attach an Audio Memo (Optional)</label>
-              <div className="flex items-center gap-3">
-                <button
-                  onMouseDown={startRecording}
-                  onMouseUp={stopRecording}
-                  onMouseLeave={stopRecording}
-                  onTouchStart={startRecording}
-                  onTouchEnd={stopRecording}
-                  className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 font-medium transition-all ${
-                    isRecording 
-                      ? 'bg-rose-500 text-white shadow-[0_0_20px_rgba(244,63,94,0.5)] scale-[0.98]' 
-                      : audioBlob ? 'bg-white/20 text-white border border-white/30' : 'bg-white/10 text-white hover:bg-white/20'
-                  }`}
-                >
-                  <Mic className={`w-5 h-5 ${isRecording ? 'animate-pulse' : ''}`} />
-                  {isRecording ? 'Recording...' : audioBlob ? 'Recorded!' : 'Hold to Record'}
-                </button>
-                {audioBlob && (
-                  <button 
-                    onClick={() => setAudioBlob(null)}
-                    className="p-3 bg-white/10 rounded-xl hover:bg-white/20 text-white/50 hover:text-white"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <button 
-              onClick={confirmUpload}
-              disabled={uploading}
-              className="btn-primary w-full flex items-center justify-center gap-2"
-            >
-              {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
-              {uploading ? 'Uploading...' : 'Post to Gallery'}
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* AI Memory Story Slideshow Modal */}
       <AnimatePresence>
@@ -985,6 +570,13 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
 
       {/* Decorative Blur */}
       <div className="fixed bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent pointer-events-none" />
+      
+      {/* Copyright Footer */}
+      <footer className="relative z-10 mt-20 py-8 border-t border-white/5 text-center">
+        <p className="text-[10px] uppercase tracking-[0.5em] text-white/20 font-light">
+          © 2026 DAPAZCM • ALL RIGHTS RESERVED
+        </p>
+      </footer>
     </div>
   );
 }

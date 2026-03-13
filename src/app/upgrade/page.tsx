@@ -58,87 +58,93 @@ export default function UpgradePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center py-12 px-6 bg-black relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center py-6 px-4 bg-black relative overflow-x-hidden">
       {/* Background Glows */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/[0.03] rounded-full blur-[100px] pointer-events-none translate-x-1/4 -translate-y-1/4" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-white/[0.02] rounded-full blur-[80px] pointer-events-none -translate-x-1/4 translate-y-1/4" />
 
       <div className="w-full max-w-5xl relative z-10">
-        <div className="flex flex-col items-center text-center mb-10">
-          <Link href="/" className="text-white/40 hover:text-white transition-colors flex items-center gap-2 mb-6 text-sm tracking-widest uppercase">
-            <ArrowLeft className="w-4 h-4" /> Exit
+        <div className="flex flex-col items-center text-center mb-8">
+          <Link href="/" className="text-white/40 hover:text-white transition-colors flex items-center gap-2 mb-4 text-[10px] tracking-widest uppercase font-bold">
+            <ArrowLeft className="w-3 h-3" /> Exit
           </Link>
-          <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-4 border border-white/10 shadow-xl">
-             <Crown className="w-8 h-8 text-white/80" />
+          <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center mb-3 border border-white/10 shadow-xl">
+             <Crown className="w-6 h-6 text-white/80" />
           </div>
-          <h1 className="text-4xl font-serif font-light mb-2">Choose Your Sanctuary</h1>
-          <p className="text-white/40 text-sm max-w-sm">Premium features at an affordable price, created to immortalize your memories forever.</p>
+          <h1 className="text-3xl font-serif font-light mb-1">Sanctuary Tiers</h1>
+          <p className="text-white/30 text-[10px] uppercase tracking-widest max-w-xs">Premium memories, simple pricing.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
           {/* STARTER */}
-          <div className="glass-card p-8 flex flex-col items-center text-center border border-white/5 bg-white/[0.01]">
-            <h3 className="text-xs uppercase tracking-[0.2em] text-white/40 mb-2">Starter</h3>
-            <div className="flex items-end gap-1 mb-6">
-              <span className="text-3xl font-serif">Free</span>
+          <div className="glass-card p-6 flex flex-col items-center text-center border border-white/5 bg-white/[0.01]">
+            <h3 className="text-[10px] uppercase tracking-[0.2em] text-white/30 mb-2 font-bold">Starter</h3>
+            <div className="flex items-end gap-1 mb-4">
+              <span className="text-2xl font-serif">Free</span>
             </div>
-            <div className="space-y-4 mb-10 text-sm text-white/60 w-full text-left">
-              <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-white/20" /> 1 Event Gallery</div>
-              <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-white/20" /> 50 Photo Limit</div>
-              <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-white/20" /> Basic Theme</div>
+            <div className="space-y-3 mb-8 text-[11px] text-white/40 w-full text-left">
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-white/10" /> 1 Event Gallery</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-white/10" /> 50 Photo Limit</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-white/10" /> Basic Theme</div>
             </div>
-            <button className="w-full py-3 glass text-white/40 rounded-xl text-sm font-bold cursor-default mt-auto">Current Plan</button>
+            <button className="w-full py-2.5 glass text-white/20 rounded-lg text-[10px] font-bold uppercase tracking-widest cursor-default mt-auto">Current Plan</button>
           </div>
 
           {/* LEGACY */}
-          <div className="glass-card p-8 flex flex-col items-center text-center border border-white/20 bg-white/[0.03] relative scale-105 shadow-[0_0_50px_rgba(255,255,255,0.05)]">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white text-black text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full">Recommended</div>
-            <h3 className="text-xs uppercase tracking-[0.2em] text-white/60 mb-2">Legacy</h3>
-            <div className="flex items-end gap-1 mb-6">
-              <span className="text-4xl font-serif font-bold">$4.99</span>
-              <span className="text-white/40 text-sm mb-1">/ one-time</span>
+          <div className="glass-card p-6 flex flex-col items-center text-center border border-white/20 bg-white/[0.03] relative shadow-[0_0_50px_rgba(255,255,255,0.05)]">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white text-black text-[8px] font-bold uppercase tracking-[0.2em] px-3 py-1 rounded-full">Recommended</div>
+            <h3 className="text-[10px] uppercase tracking-[0.2em] text-white/60 mb-2 font-bold">Legacy</h3>
+            <div className="flex items-end gap-1 mb-4">
+              <span className="text-3xl font-serif font-bold">$2.99</span>
+              <span className="text-white/40 text-[10px] mb-1">/ one-time</span>
             </div>
-            <div className="space-y-4 mb-10 text-sm text-white/80 w-full text-left">
-              <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-white" /> 5 Event Galleries</div>
-              <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-white" /> Guest Tribute Wall</div>
-              <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-white" /> Digital Candle Sanctuary</div>
-              <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-white" /> No Subscription</div>
+            <div className="space-y-3 mb-8 text-[11px] text-white/70 w-full text-left">
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-white" /> 5 Event Galleries</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-white" /> Guest Tribute Wall</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-white" /> Digital Candle Sanctuary</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-white" /> No Subscription</div>
             </div>
             <button
               onClick={handleUpgrade}
               disabled={loading}
-              className="w-full py-4 bg-white text-black rounded-xl text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl mt-auto"
+              className="w-full py-3 bg-white text-black rounded-lg text-[10px] font-bold uppercase tracking-[0.15em] transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl mt-auto"
             >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Get Legacy'}
+              {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Get Legacy'}
             </button>
           </div>
 
           {/* INFINITY */}
-          <div className="glass-card p-8 flex flex-col items-center text-center border border-white/5 bg-white/[0.01]">
-            <h3 className="text-xs uppercase tracking-[0.2em] text-white/40 mb-2">Infinity</h3>
-            <div className="flex items-end gap-1 mb-6">
-              <span className="text-3xl font-serif font-medium">$12.99</span>
-              <span className="text-white/40 text-sm mb-1">/ lifetime</span>
+          <div className="glass-card p-6 flex flex-col items-center text-center border border-white/5 bg-white/[0.01]">
+            <h3 className="text-[10px] uppercase tracking-[0.2em] text-white/30 mb-2 font-bold">Infinity</h3>
+            <div className="flex items-end gap-1 mb-4">
+              <span className="text-2xl font-serif font-medium">$9.99</span>
+              <span className="text-white/40 text-[10px] mb-1">/ lifetime</span>
             </div>
-            <div className="space-y-4 mb-10 text-sm text-white/60 w-full text-left">
-              <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-white/40" /> Unlimited Galleries</div>
-              <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-white/40" /> AI Story & Memory Loops</div>
-              <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-white/40" /> Live TV Slideshow Mode</div>
-              <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-white/40" /> Hi-Res Archive Export</div>
+            <div className="space-y-3 mb-8 text-[11px] text-white/40 w-full text-left">
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-white/10" /> Unlimited Galleries</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-white/10" /> AI Story & Memory Loops</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-white/10" /> Live TV Slideshow Mode</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-white/10" /> Hi-Res Archive Export</div>
             </div>
             <button
               onClick={handleUpgrade}
               disabled={loading}
-              className="w-full py-3 glass text-white rounded-xl text-sm font-bold transition-all hover:bg-white/10 mt-auto"
+              className="w-full py-2.5 glass text-white/60 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all hover:bg-white/10 mt-auto"
             >
               Select Infinity
             </button>
           </div>
         </div>
         
-        <p className="text-center text-white/20 text-[10px] mt-12 uppercase tracking-widest flex items-center justify-center gap-2">
-          <Sparkles className="w-3 h-3" /> Secure One-Time Payment Powered by Memorial Systems
-        </p>
+        <div className="mt-12 pt-8 border-t border-white/5 text-center">
+          <p className="text-[10px] uppercase tracking-[0.5em] text-white/10 font-light mb-4">
+            <Sparkles className="w-3 h-3 inline-block mr-2 opacity-20" /> 
+            Secure One-Time Payment • DAPAZCM
+          </p>
+          <p className="text-[8px] uppercase tracking-[0.2em] text-white/5">
+            © 2026 DAPAZCM • ALL RIGHTS RESERVED
+          </p>
+        </div>
       </div>
     </div>
   );
