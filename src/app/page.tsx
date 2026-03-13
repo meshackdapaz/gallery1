@@ -54,7 +54,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col items-center bg-black text-white app-container overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center bg-black text-white app-container overflow-x-hidden">
       {/* Background Ambience */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 right-[-10%] w-[120vw] h-[120vw] md:w-[60rem] md:h-[60rem] bg-white/[0.02] rounded-full blur-[120px] translate-x-1/2 -translate-y-1/2" />
@@ -65,7 +65,7 @@ export default function LandingPage() {
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="w-full max-w-[1280px] flex-1 flex flex-col items-center justify-center z-10 py-6 md:py-12"
+        className="w-full max-w-[1280px] flex flex-col items-center z-10 py-12 md:py-24 pb-48 md:pb-56"
       >
         {/* Branding Section */}
         <motion.section variants={itemVariants} className="flex flex-col items-center mb-12 md:mb-16 text-center w-full focus:outline-none">

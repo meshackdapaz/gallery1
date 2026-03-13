@@ -23,13 +23,19 @@ function LoginContent() {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (signInError) {
-      setLocalError(signInError.message);
+      if (signInError) {
+        setLocalError(signInError.message);
+        setLoading(false);
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setLocalError(err.message || 'Network error: Load failed. Please check your connection.');
       setLoading(false);
-    } else {
-      router.push('/dashboard');
     }
   };
 
@@ -82,9 +88,15 @@ function LoginContent() {
             </div>
           </div>
 
-          <button type="submit" disabled={loading} className="w-full bg-white text-black py-3 rounded-xl tracking-wide font-bold flex items-center justify-center gap-2 hover:bg-gray-100 transition-all active:scale-[0.98]">
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Log In'}
-          </button>
+          {!loading ? (
+            <button type="submit" className="w-full bg-white text-black py-3 rounded-xl tracking-wide font-bold flex items-center justify-center gap-2 hover:bg-gray-100 transition-all active:scale-[0.98]">
+              Log In
+            </button>
+          ) : (
+            <div className="w-full flex justify-center py-3">
+              <Loader2 className="w-6 h-6 animate-spin text-white/40" />
+            </div>
+          )}
 
           <div className="text-center mt-2">
             <Link href="/signup" className="text-sm text-white/40 hover:text-white transition-colors">
