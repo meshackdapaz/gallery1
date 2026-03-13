@@ -69,7 +69,9 @@ function LoginContent() {
                 type="button"
                 onClick={() => {
                   const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'unknown';
-                  const details = `Debug Info:\n- Error: ${localError}\n- Origin: ${currentOrigin}\n- Connectivity: ${navigator.onLine ? 'Online' : 'Offline'}`;
+                  // @ts-ignore - Accessing the private supabase url for debugging
+                  const supabaseUrl = supabase.supabaseUrl || 'unknown';
+                  const details = `Debug Info:\n- Error: ${localError}\n- Origin: ${currentOrigin}\n- Supabase URL: ${supabaseUrl}\n- Connectivity: ${navigator.onLine ? 'Online' : 'Offline'}`;
                   alert(details);
                 }}
                 className="text-[10px] text-white/20 uppercase tracking-widest hover:text-white/40 transition-colors mx-auto"
