@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, use, useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Camera, Upload, Loader2, ArrowLeft, Maximize2, QrCode, Heart, Download, Copy, Archive, Mic, Play, Pause, X, MonitorPlay, Trash2 } from 'lucide-react';
+import { Camera, Upload, Loader2, ArrowLeft, Maximize2, QrCode, Heart, Download, Copy, Archive, Mic, Play, Pause, X, MonitorPlay, Trash2, Flame, MessageSquare, Send } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { QRCodeSVG } from 'qrcode.react';
@@ -57,6 +57,14 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
   const [copied, setCopied] = useState(false);
   const [downloadingZip, setDownloadingZip] = useState(false);
   const [deletingEvent, setDeletingEvent] = useState(false);
+  
+  // Interactive Features State
+  const [candles, setCandles] = useState<any[]>([]);
+  const [guestbook, setGuestbook] = useState<any[]>([]);
+  const [lightingCandle, setLightingCandle] = useState(false);
+  const [showGuestbook, setShowGuestbook] = useState(false);
+  const [newMessage, setNewMessage] = useState('');
+  const [postingMessage, setPostingMessage] = useState(false);
   
   // Audio Memo & Upload Modal State
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -113,6 +121,21 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
           setReactions(reactionData || []);
         }
 
+        // Fetch Candles
+        const { data: candleData } = await supabase
+          .from('gallery_candles')
+          .select('*')
+          .eq('event_id', eventData.id);
+        setCandles(candleData || []);
+
+        // Fetch Guestbook
+        const { data: guestbookData } = await supabase
+          .from('gallery_guestbook')
+          .select('*')
+          .eq('event_id', eventData.id)
+          .order('created_at', { ascending: false });
+        setGuestbook(guestbookData || []);
+
         // Realtime Setup for Standard Supabase
         const channel = supabase.channel(`gallery_updates_${eventData.id}`)
           .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'photos' }, (payload: any) => {
@@ -123,6 +146,12 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
           })
           .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'photo_reactions' }, (payload: any) => {
              setReactions((prev) => [...prev, payload.new]);
+          })
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'gallery_candles' }, (payload: any) => {
+             setCandles((prev) => [...prev, payload.new]);
+          })
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'gallery_guestbook' }, (payload: any) => {
+             setGuestbook((prev) => [payload.new, ...prev]);
           })
           .subscribe();
 
@@ -278,6 +307,40 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
       await supabase.from('photo_reactions').insert([{ photo_id: photoId, user_id: user.id }]);
     } catch (e) {
       // Ignored for duplicates
+    }
+  };
+
+  const handleLightCandle = async () => {
+    if (!user) {
+      alert('Please sign in to light a candle.');
+      return;
+    }
+    setLightingCandle(true);
+    try {
+      await supabase.from('gallery_candles').insert([{ event_id: event.id, user_id: user.id }]);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLightingCandle(false);
+    }
+  };
+
+  const handlePostTribute = async () => {
+    if (!user || !newMessage.trim()) return;
+    setPostingMessage(true);
+    try {
+      const { error } = await supabase.from('gallery_guestbook').insert([{
+        event_id: event.id,
+        user_id: user.id,
+        author_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous',
+        message: newMessage.trim()
+      }]);
+      if (error) throw error;
+      setNewMessage('');
+    } catch (e) {
+      alert('Failed to post tribute.');
+    } finally {
+      setPostingMessage(false);
     }
   };
 
@@ -439,6 +502,41 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
         </div>
       </header>
       
+      {/* Sanctuary Section: Digital Candles */}
+      <section className="relative z-10 max-w-6xl mx-auto mb-12">
+        <div className="glass-card p-8 flex flex-col md:flex-row items-center justify-between gap-8 border border-white/10 bg-gradient-to-br from-white/[0.05] to-transparent overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-[80px] pointer-events-none" />
+          
+          <div className="flex-1 text-center md:text-left">
+            <h2 className="text-2xl font-serif font-medium mb-2 flex items-center justify-center md:justify-start gap-3">
+              <Flame className="w-6 h-6 text-amber-400" /> Digital Candle Sanctuary
+            </h2>
+            <p className="text-white/40 max-w-md">Lighting a virtual candle is a small but powerful way to show your presence and support. Each flame represents a shared memory.</p>
+          </div>
+
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex items-center gap-6">
+              <div className="text-center">
+                <div className="text-3xl font-serif font-bold text-white">{candles.length}</div>
+                <div className="text-[10px] uppercase tracking-widest text-white/30">Candles Lit</div>
+              </div>
+              <div className="w-px h-10 bg-white/10" />
+              <button 
+                onClick={handleLightCandle}
+                disabled={lightingCandle}
+                className={`group relative flex items-center justify-center p-6 rounded-full transition-all border ${
+                  lightingCandle ? 'bg-amber-500/20 border-amber-500/40 text-amber-500' : 'bg-white/5 border-white/10 hover:border-amber-500/40 hover:bg-amber-500/10'
+                }`}
+              >
+                <Flame className={`w-8 h-8 transition-all ${lightingCandle ? 'animate-bounce' : 'group-hover:scale-125'}`} />
+                {lightingCandle && <Loader2 className="absolute inset-0 w-full h-full animate-spin opacity-20" />}
+              </button>
+            </div>
+            <span className="text-[10px] uppercase tracking-widest text-white/30 font-bold">Press to light a flame</span>
+          </div>
+        </div>
+      </section>
+      
       <main className="relative z-10 max-w-6xl mx-auto">
         {isDeveloping ? (
            <div className="glass h-[400px] flex flex-col items-center justify-center text-center p-12 relative overflow-hidden">
@@ -507,6 +605,57 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
             ))}
           </div>
         )}
+
+        {/* Guestbook / Tribute Wall */}
+        <section className="mt-24 pb-32">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl font-serif font-medium flex items-center gap-3">
+                <MessageSquare className="w-6 h-6 text-white/60" /> Tribute Guestbook
+              </h2>
+              <p className="text-white/40 text-sm mt-1">Leave a message of love, a favorite quote, or a simple prayer.</p>
+            </div>
+            <button 
+              onClick={() => setShowGuestbook(!showGuestbook)}
+              className="text-sm font-bold uppercase tracking-widest text-white/60 hover:text-white transition-colors"
+            >
+              {showGuestbook ? 'Close' : 'Write a Tribute'}
+            </button>
+          </div>
+
+          {showGuestbook && (
+            <div className="glass-card p-6 mb-12 border border-white/20 bg-white/5">
+              <textarea 
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Write your heart here..."
+                className="w-full bg-transparent border-none outline-none text-white placeholder:text-white/20 resize-none h-32 mb-4"
+              />
+              <div className="flex justify-end">
+                <button 
+                  onClick={handlePostTribute}
+                  disabled={postingMessage || !newMessage.trim()}
+                  className="btn-primary flex items-center gap-2 px-8 py-3 rounded-full"
+                >
+                  {postingMessage ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  <span>Post Tribute</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {guestbook.map((tribute) => (
+              <div key={tribute.id} className="glass-card p-6 border border-white/5 bg-white/[0.02]">
+                <p className="text-white/80 italic mb-6 leading-relaxed">"{tribute.message}"</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-widest text-white/40">— {tribute.author_name}</span>
+                  <span className="text-[10px] text-white/20 font-mono">{new Date(tribute.created_at).toLocaleDateString()}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       </main>
 
       {/* QR Code Modal */}
