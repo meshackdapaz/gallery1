@@ -53,10 +53,12 @@ export default function SignupPage() {
     } catch (err: any) {
       console.error('Signup exception:', err);
       const msg = err.message || 'Unknown error';
+      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'unknown';
+      
       if (msg.toLowerCase().includes('failed to fetch') || msg.toLowerCase().includes('load failed')) {
-        setError('Network restriction: The connection to the sanctuary was blocked. Please check your internet.');
+        setError(`Network error: The sanctuary connection was blocked. Origin: ${currentOrigin}. Check internet or Supabase CORS settings.`);
       } else {
-        setError(`System error: ${msg}`);
+        setError(`System error: ${msg} (${currentOrigin})`);
       }
       setLoading(false);
     }
