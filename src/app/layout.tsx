@@ -22,6 +22,11 @@ export default function RootLayout({
           <SplashScreen />
           <Navbar />
           {children}
+          <footer className="relative z-10 py-8 px-6 text-center border-t border-white/5">
+            <p className="text-[10px] uppercase tracking-[0.4em] text-white/20 font-bold">
+              © 2026 DAPAZCM • All Rights Reserved
+            </p>
+          </footer>
         </InsforgeProvider>
       </body>
     </html>
