@@ -12,6 +12,11 @@ const config: CapacitorConfig = {
       showSpinner: false,
     },
   },
+  server: {
+    hostname: 'memorial-gallery.meshackdapaz.com',
+    androidScheme: 'https',
+    iosScheme: 'memorialgallery'
+  }
 };
 
 export default config;
