@@ -33,8 +33,14 @@ function LoginContent() {
         router.push('/dashboard');
       }
     } catch (err: any) {
-      console.error('Login error:', err);
-      setLocalError(err.message || 'Network error: Load failed. Please check your connection.');
+      console.error('Login exception:', err);
+      // Detailed error for common mobile load failures
+      const msg = err.message || 'Unknown error';
+      if (msg.toLowerCase().includes('failed to fetch') || msg.toLowerCase().includes('load failed')) {
+        setLocalError('Network restriction: The connection to the sanctuary was blocked. Please check your internet or VPN.');
+      } else {
+        setLocalError(`Auth Error: ${msg}`);
+      }
       setLoading(false);
     }
   };

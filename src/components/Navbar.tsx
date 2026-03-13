@@ -2,12 +2,17 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { LogIn, User } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 
 export default function Navbar() {
+  const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
   const supabase = createClient();
+
+  // Hide navbar on auth pages
+  if (pathname === '/login' || pathname === '/signup') return null;
 
   useEffect(() => {
     async function loadUser() {

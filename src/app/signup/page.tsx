@@ -29,7 +29,7 @@ export default function SignupPage() {
     }
 
     try {
-      const { error: signUpError } = await supabase.auth.signUp({
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -42,12 +42,21 @@ export default function SignupPage() {
       if (signUpError) {
         setError(signUpError.message);
         setLoading(false);
+      } else if (data.user && data.session === null) {
+        // Confirmation email might be sent
+        setError('Verification email sent. Please check your inbox.');
+        setLoading(false);
       } else {
         router.push('/dashboard');
       }
     } catch (err: any) {
-      console.error('Signup error:', err);
-      setError(err.message || 'Network error: Load failed. Please check your connection.');
+      console.error('Signup exception:', err);
+      const msg = err.message || 'Unknown error';
+      if (msg.toLowerCase().includes('failed to fetch') || msg.toLowerCase().includes('load failed')) {
+        setError('Network restriction: The connection to the sanctuary was blocked. Please check your internet.');
+      } else {
+        setError(`System error: ${msg}`);
+      }
       setLoading(false);
     }
   };
