@@ -61,23 +61,8 @@ function LoginContent() {
         <form onSubmit={handleLogin} className="flex flex-col gap-6">
           
           {(errorParam || localError) && (
-            <div className="flex flex-col gap-2">
-              <div className="bg-rose-500/10 text-rose-500 text-sm p-3 rounded-lg border border-rose-500/20 text-center">
-                {errorParam || localError}
-              </div>
-              <button 
-                type="button"
-                onClick={() => {
-                  const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'unknown';
-                  // @ts-ignore - Accessing the private supabase url for debugging
-                  const supabaseUrl = supabase.supabaseUrl || 'unknown';
-                  const details = `Debug Info:\n- Error: ${localError}\n- Origin: ${currentOrigin}\n- Supabase URL: ${supabaseUrl}\n- Connectivity: ${navigator.onLine ? 'Online' : 'Offline'}`;
-                  alert(details);
-                }}
-                className="text-[10px] text-white/20 uppercase tracking-widest hover:text-white/40 transition-colors mx-auto"
-              >
-                View Technical Details
-              </button>
+            <div className="bg-rose-500/10 text-rose-500 text-sm p-3 rounded-lg border border-rose-500/20 text-center">
+              {errorParam || localError}
             </div>
           )}
 

@@ -56,9 +56,9 @@ export default function SignupPage() {
       const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'unknown';
       
       if (msg.toLowerCase().includes('failed to fetch') || msg.toLowerCase().includes('load failed')) {
-        setError(`Network error: The sanctuary connection was blocked. Origin: ${currentOrigin}. Check internet or Supabase CORS settings.`);
+        setError('Network error: Could not connect to the sanctuary. Please check your internet.');
       } else {
-        setError(`System error: ${msg} (${currentOrigin})`);
+        setError(`System error: ${msg}`);
       }
       setLoading(false);
     }
