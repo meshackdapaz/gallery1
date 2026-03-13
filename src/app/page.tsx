@@ -18,17 +18,28 @@ export default function LandingPage() {
 
   useEffect(() => {
     async function loadUser() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUser(user);
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_pro')
-          .eq('id', user.id)
-          .single();
-        setIsPro(profile?.is_pro || false);
+      // Safety timeout to ensure authLoading is cleared
+      const timeout = setTimeout(() => {
+        setAuthLoading(false);
+      }, 3000);
+
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setUser(user);
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('is_pro')
+            .eq('id', user.id)
+            .single();
+          setIsPro(profile?.is_pro || false);
+        }
+      } catch (e) {
+        console.error("Auth pre-load error:", e);
+      } finally {
+        clearTimeout(timeout);
+        setAuthLoading(false);
       }
-      setAuthLoading(false);
     }
     loadUser();
   }, [supabase.auth]);
