@@ -1,18 +1,24 @@
-import { createBrowserClient } from '@supabase/ssr'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
 export function createClient() {
   const url = process.env.NEXT_PUBLIC_INSFORGE_BASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY;
 
   if (!url || !anonKey) {
-    // During build or if secrets are missing, return a dummy client 
-    // to prevent the process from crashing.
-    console.warn('Supabase URL or Anon Key is missing. Using dummy client for pre-rendering.');
-    return createBrowserClient(
+    // Fallback for build time
+    console.warn('Supabase URL or Anon Key is missing. Using dummy client.');
+    return createSupabaseClient(
       'https://dummy.supabase.co',
       'dummy-key'
     );
   }
 
-  return createBrowserClient(url, anonKey);
+  return createSupabaseClient(url, anonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      storageKey: 'memorial-gallery-auth'
+    }
+  });
 }

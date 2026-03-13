@@ -35,12 +35,13 @@ function LoginContent() {
       }
     } catch (err: any) {
       console.error('Login exception:', err);
-      // Detailed error for common mobile load failures
       const msg = err.message || 'Unknown error';
+      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'unknown';
+      
       if (msg.toLowerCase().includes('failed to fetch') || msg.toLowerCase().includes('load failed')) {
-        setLocalError('Network restriction: The connection to the sanctuary was blocked. Please check your internet or VPN.');
+        setLocalError(`Network error: The connection was blocked. Origin: ${currentOrigin}. Check your internet or Supabase CORS settings.`);
       } else {
-        setLocalError(`Auth Error: ${msg}`);
+        setLocalError(`Auth Error: ${msg} (${currentOrigin})`);
       }
       setLoading(false);
     }
