@@ -4,15 +4,21 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Loader2, Plus, ArrowRight, Image as ImageIcon, Sparkles, User, Mail, Shield, LogOut, Camera } from 'lucide-react';
+import { Loader2, Plus, ArrowRight, Image as ImageIcon, Sparkles, User, Mail, Shield, LogOut, Camera, X, Check } from 'lucide-react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import Cropper from 'react-easy-crop';
+import { getCroppedImg } from '@/utils/image-crop';
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
@@ -45,19 +51,36 @@ export default function DashboardPage() {
     loadUserAndEvents();
   }, []);
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
+    if (file) {
+      const reader = new FileReader();
+      reader.addEventListener('load', () => {
+        setImageToCrop(reader.result as string);
+      });
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const onCropComplete = (rest: any, croppedAreaPixels: any) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  };
+
+  const handleAvatarUpload = async () => {
+    if (!imageToCrop || !croppedAreaPixels || !user) return;
     
     setUploadingAvatar(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `avatar_${user.id}_${Date.now()}.${fileExt}`;
+      const croppedImage = await getCroppedImg(imageToCrop, croppedAreaPixels);
+      const fileName = `avatar_${user.id}_${Date.now()}.jpg`;
       const filePath = `avatars/${fileName}`;
       
       const { error: uploadError } = await supabase.storage
         .from('memorial-photos')
-        .upload(filePath, file);
+        .upload(filePath, croppedImage, {
+          contentType: 'image/jpeg',
+          upsert: true
+        });
         
       if (uploadError) throw uploadError;
 
@@ -65,15 +88,18 @@ export default function DashboardPage() {
         .from('memorial-photos')
         .getPublicUrl(filePath);
 
-      await supabase.auth.updateUser({
+      const { error: updateError } = await supabase.auth.updateUser({
         data: { avatar_url: publicUrl }
       });
       
+      if (updateError) throw updateError;
+      
       const { data: { user: updatedUser } } = await supabase.auth.getUser();
       setUser(updatedUser);
-    } catch (err) {
+      setImageToCrop(null);
+    } catch (err: any) {
       console.error('Error uploading avatar:', err);
-      alert('Failed to update avatar. Please try again.');
+      alert(`Failed to update avatar: ${err.message || 'Unknown error'}. Check your internet connection.`);
     } finally {
       setUploadingAvatar(false);
       if (avatarInputRef.current) avatarInputRef.current.value = '';
@@ -129,7 +155,7 @@ export default function DashboardPage() {
                   accept="image/*" 
                   className="hidden" 
                   ref={avatarInputRef}
-                  onChange={handleAvatarUpload}
+                  onChange={handleFileSelect}
                 />
                 <div className={`relative ${uploadingAvatar ? 'opacity-50' : 'group-hover:opacity-80'} transition-opacity`}>
                   {user.user_metadata?.avatar_url ? (
@@ -269,6 +295,76 @@ export default function DashboardPage() {
           </motion.div>
         )}
       </div>
+
+      {/* Cropping Modal */}
+      <AnimatePresence>
+        {imageToCrop && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="glass-card w-full max-w-lg aspect-square relative overflow-hidden rounded-3xl border border-white/20 shadow-[0_0_100px_rgba(255,255,255,0.1)]"
+            >
+              <div className="absolute inset-0">
+                <Cropper
+                  image={imageToCrop}
+                  crop={crop}
+                  zoom={zoom}
+                  aspect={1}
+                  onCropChange={setCrop}
+                  onCropComplete={onCropComplete}
+                  onZoomChange={setZoom}
+                  cropShape="round"
+                  showGrid={false}
+                />
+              </div>
+
+              {/* Modal Controls */}
+              <div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10">
+                <button 
+                  onClick={() => setImageToCrop(null)}
+                  className="bg-black/50 backdrop-blur-md p-3 rounded-full border border-white/10 text-white/70 hover:text-white transition-all active:scale-95"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+                <h3 className="text-white font-medium tracking-wide">Adjust Profile Picture</h3>
+                <button 
+                  onClick={handleAvatarUpload}
+                  disabled={uploadingAvatar}
+                  className="bg-white text-black p-3 rounded-full border border-white/10 transition-all active:scale-95 shadow-xl disabled:opacity-50"
+                >
+                  {uploadingAvatar ? <Loader2 className="w-6 h-6 animate-spin" /> : <Check className="w-6 h-6" />}
+                </button>
+              </div>
+
+              <div className="absolute bottom-10 left-8 right-8 z-10">
+                <div className="bg-black/40 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+                  <input
+                    type="range"
+                    value={zoom}
+                    min={1}
+                    max={3}
+                    step={0.1}
+                    aria-labelledby="Zoom"
+                    onChange={(e) => setZoom(Number(e.target.value))}
+                    className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-white"
+                  />
+                  <div className="flex justify-between mt-2">
+                    <span className="text-[10px] text-white/40 uppercase tracking-widest">Zoom</span>
+                    <span className="text-[10px] text-white/40 font-mono">{zoom.toFixed(1)}x</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

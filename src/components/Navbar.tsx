@@ -57,9 +57,9 @@ export default function Navbar() {
               </Link>
               
               <Link 
-                href="/dashboard" 
+                href="/dashboard#profile" 
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-full transition-all active:scale-95 text-sm font-medium ${
-                  pathname === '/profile' 
+                  pathname === '/dashboard' && (typeof window !== 'undefined' && window.location.hash === '#profile')
                   ? 'bg-white text-black' 
                   : 'text-white/60 hover:text-white hover:bg-white/5'
                 }`}
