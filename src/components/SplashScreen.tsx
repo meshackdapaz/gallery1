@@ -19,12 +19,12 @@ export default function SplashScreen() {
     if (index < WORDS.length - 1) {
       const timer = setTimeout(() => {
         setIndex(prev => prev + 1);
-      }, 600);
+      }, 1200);
       return () => clearTimeout(timer);
     } else {
       const finalTimer = setTimeout(() => {
         setShow(false);
-      }, 1200);
+      }, 2000);
       return () => clearTimeout(finalTimer);
     }
   }, [index]);

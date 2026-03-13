@@ -26,23 +26,30 @@ export default function Navbar() {
   }, [supabase.auth]);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 pointer-events-none header app-container">
-      <Link href="/" className="font-serif italic text-xl pointer-events-auto">V</Link>
-      <div className="flex gap-4 pointer-events-auto">
-        {!user ? (
-          <div className="flex gap-2 text-sm font-semibold signin-btn">
-            <Link href="/login" className="bg-white hover:bg-white/90 transition-colors rounded-full px-4 py-2 text-black cursor-pointer flex items-center gap-2">
-              <LogIn className="w-4 h-4" /> Sign In
-            </Link>
-          </div>
-        ) : (
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="bg-white/10 hover:bg-white/20 transition-colors rounded-full px-4 py-2 backdrop-blur-md border border-white/10 text-white text-sm font-semibold flex items-center justify-center">
-              Dashboard
-            </Link>
-          </div>
-        )}
+    <>
+      {/* Branding - Top Center */}
+      <div className="fixed top-0 left-0 right-0 flex justify-center py-6 z-50 pointer-events-none">
+        <Link href="/" className="font-serif italic text-2xl pointer-events-auto bg-black/20 backdrop-blur-sm rounded-full px-4 border border-white/5">V</Link>
       </div>
-    </nav>
+
+      {/* Navigation - Bottom */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] flex justify-center pointer-events-none">
+        <div className="flex gap-4 pointer-events-auto glass-card border border-white/10 rounded-full px-6 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.5)] bg-black/40 backdrop-blur-xl">
+          {!user ? (
+            <div className="flex gap-2 text-sm font-semibold signin-btn">
+              <Link href="/login" className="bg-white hover:bg-white/90 transition-all active:scale-95 rounded-full px-6 py-2.5 text-black cursor-pointer flex items-center gap-2">
+                <LogIn className="w-4 h-4" /> Sign In
+              </Link>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Link href="/dashboard" className="bg-white/10 hover:bg-white/20 transition-all active:scale-95 rounded-full px-6 py-2.5 backdrop-blur-md border border-white/10 text-white text-sm font-semibold flex items-center justify-center">
+                Dashboard
+              </Link>
+            </div>
+          )}
+        </div>
+      </nav>
+    </>
   );
 }

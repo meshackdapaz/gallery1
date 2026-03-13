@@ -65,15 +65,15 @@ export default function LandingPage() {
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="w-full max-w-[1280px] flex flex-col items-center z-10 py-12 md:py-24"
+        className="w-full max-w-[1280px] flex flex-col items-center z-10 py-12 md:py-24 pb-32 md:pb-40"
       >
         {/* Branding Section */}
-        <motion.section variants={itemVariants} className="flex flex-col items-center mb-16 md:mb-24 text-center w-full">
+        <motion.section variants={itemVariants} className="flex flex-col items-center mb-16 md:mb-24 text-center w-full focus:outline-none">
           <div className="w-20 md:w-28 aspect-square glass flex items-center justify-center mb-6 md:mb-10 rounded-2xl md:rounded-[2rem] border border-white/10 shadow-[0_0_40px_rgba(255,255,255,0.05)]">
             <span className="text-3xl md:text-5xl font-serif italic text-white/90">V</span>
           </div>
           
-          <h1 className="title font-serif font-light tracking-tighter leading-[1.1] mb-6">
+          <h1 className="title font-serif font-light tracking-tighter leading-[1.1] mb-6 outline-none">
             MEMORIAL<br /><span className="text-white/40 italic">GALLERY</span>
           </h1>
           
@@ -85,7 +85,16 @@ export default function LandingPage() {
         {/* Dynamic Grid: Adaptive based on manifesto widths */}
         <motion.section variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 w-full max-w-[800px] mx-auto">
           {/* Host Action */}
-          <Link href="/host" className="group w-full">
+          <button 
+            onClick={() => {
+              if (!user) {
+                router.push('/login');
+              } else {
+                router.push('/host');
+              }
+            }}
+            className="group w-full text-left"
+          >
             <div className="card glass-card flex flex-col border border-white/5 hover:border-white/20 transition-all duration-500 h-full hover:bg-white/[0.03]">
               <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 border border-white/10">
                 <Users className="w-5 h-5 text-white/80" />
@@ -98,7 +107,7 @@ export default function LandingPage() {
                 Start Session <ArrowRight className="w-4 h-4" />
               </div>
             </div>
-          </Link>
+          </button>
 
           {/* Join Action */}
           <div className="card glass-card flex flex-col border border-white/5 h-full">
