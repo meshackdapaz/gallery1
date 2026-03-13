@@ -76,7 +76,7 @@ export default function SplashScreen() {
                     duration: 0.5, 
                     ease: [0.22, 1, 0.36, 1] 
                   }}
-                  className="text-3xl md:text-4xl font-light tracking-[0.4em] font-serif uppercase text-center block"
+                  className="text-2xl xs:text-3xl md:text-4xl font-light tracking-[0.2em] md:tracking-[0.4em] font-serif uppercase text-center block"
                 >
                   {WORDS[index]}
                 </motion.span>

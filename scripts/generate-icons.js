@@ -3,9 +3,13 @@ const fs = require('fs');
 const path = require('path');
 
 const resourcesDir = path.join(__dirname, '../resources');
-if (!fs.existsSync(resourcesDir)) {
-  fs.mkdirSync(resourcesDir, { recursive: true });
-}
+const assetsDir = path.join(__dirname, '../assets');
+
+[resourcesDir, assetsDir].forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
 
 async function generate() {
   const iconSvg = `
@@ -23,14 +27,14 @@ async function generate() {
   `;
 
   console.log('Generating icon.png...');
-  await sharp(Buffer.from(iconSvg))
-    .png()
-    .toFile(path.join(resourcesDir, 'icon.png'));
+  const iconBuffer = await sharp(Buffer.from(iconSvg)).png().toBuffer();
+  await fs.promises.writeFile(path.join(resourcesDir, 'icon.png'), iconBuffer);
+  await fs.promises.writeFile(path.join(assetsDir, 'icon.png'), iconBuffer);
 
   console.log('Generating splash.png...');
-  await sharp(Buffer.from(splashSvg))
-    .png()
-    .toFile(path.join(resourcesDir, 'splash.png'));
+  const splashBuffer = await sharp(Buffer.from(splashSvg)).png().toBuffer();
+  await fs.promises.writeFile(path.join(resourcesDir, 'splash.png'), splashBuffer);
+  await fs.promises.writeFile(path.join(assetsDir, 'splash.png'), splashBuffer);
 
   console.log('Icons generated successfully.');
 }

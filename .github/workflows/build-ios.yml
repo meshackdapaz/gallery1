@@ -32,6 +32,7 @@ jobs:
         run: |
           npx cap add ios
           npx cap sync ios
+          npx @capacitor/assets generate --ios
 
       - name: Debug iOS Project
         run: find ios -maxdepth 4 -name "*.xcworkspace" -o -name "*.xcodeproj"
