@@ -11,13 +11,17 @@ const config: CapacitorConfig = {
       backgroundColor: "#000000",
       showSpinner: false,
     },
+    CapacitorHttp: {
+      enabled: true,
+    },
   },
   server: {
     hostname: 'memorial-gallery.meshackdapaz.com',
     androidScheme: 'https',
     iosScheme: 'capacitor',
     allowNavigation: [
-      'wyhqxaicpxhdltezfmay.supabase.co'
+      'https://wyhqxaicpxhdltezfmay.supabase.co',
+      'https://*.supabase.co'
     ]
   }
 };
