@@ -231,7 +231,22 @@ export default function BoothClient({ params }: { params: Promise<{ code: string
     return new Date(unlockAt) > new Date();
   };
 
-  if (loading) return <div className="min-h-screen bg-black flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-white/20" /></div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <Loader2 className="w-8 h-8 animate-spin text-white/20" />
+      </div>
+    );
+  }
+
+  if (!event) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-black gap-4 text-white">
+        <Loader2 className="w-8 h-8 animate-spin text-white/20" />
+        <p className="text-white/40 font-serif italic uppercase tracking-[0.3em] text-[10px]">Synchronizing Booth...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white p-6 relative overflow-x-hidden">

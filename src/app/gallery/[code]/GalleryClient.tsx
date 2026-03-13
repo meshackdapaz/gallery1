@@ -177,6 +177,15 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
     );
   }
 
+  if (!event) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-black gap-4">
+        <Loader2 className="w-8 h-8 animate-spin text-white/20" />
+        <p className="text-white/40 font-serif italic uppercase tracking-[0.3em] text-[10px]">Synchronizing Sanctuary...</p>
+      </div>
+    );
+  }
+
   const handleReaction = async (photoId: string) => {
     if (!user) {
       alert('Please sign in to react to photos.');

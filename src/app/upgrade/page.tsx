@@ -58,7 +58,7 @@ export default function UpgradePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center py-6 px-4 bg-black relative overflow-x-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-start py-20 pb-32 px-4 bg-black relative overflow-y-auto overflow-x-hidden">
       {/* Background Glows */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/[0.03] rounded-full blur-[100px] pointer-events-none translate-x-1/4 -translate-y-1/4" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-white/[0.02] rounded-full blur-[80px] pointer-events-none -translate-x-1/4 translate-y-1/4" />
