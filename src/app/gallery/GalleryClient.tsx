@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, use, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { Camera, Upload, Loader2, ArrowLeft, Maximize2, QrCode, Heart, Download, Copy, Archive, Mic, Play, Pause, X, MonitorPlay, Trash2, Flame, MessageSquare, Send, Clock, Lock, Music, Volume2, VolumeX, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -45,8 +46,9 @@ const getThemeStyles = (type: string) => {
   }
 };
 
-export default function GalleryClient({ params }: { params: Promise<{ code: string }> }) {
-  const { code } = use(params);
+export default function GalleryClient() {
+  const searchParams = useSearchParams();
+  const code = searchParams.get('code') || '';
   const [event, setEvent] = useState<any>(null);
   const [photos, setPhotos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -352,7 +354,7 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
           {isHost && photos.length > 0 && (
             <>
               <Link
-                href={`/gallery/${code}/slideshow`}
+                href={`/gallery/slideshow?code=${code}`}
                 target="_blank"
                 className="btn-secondary flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors border border-white/10 hidden md:flex"
               >
@@ -379,7 +381,7 @@ export default function GalleryClient({ params }: { params: Promise<{ code: stri
           )}
 
           <Link 
-            href={`/booth/${code}`}
+            href={`/booth?code=${code}`}
             className="btn-primary flex items-center gap-2 px-8 py-2.5 rounded-full font-bold shadow-xl shadow-white/5 border border-white/20 hover:scale-105 transition-all text-white"
           >
             <Camera className="w-5 h-5" />

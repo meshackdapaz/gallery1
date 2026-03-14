@@ -1,14 +1,16 @@
 'use client';
 
 import React, { useState, useEffect, use, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { Camera, Upload, Loader2, ArrowLeft, Heart, MessageSquare, Send, X, Flame, Sparkles, Mic, Play, Pause, Lock, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function BoothClient({ params }: { params: Promise<{ code: string }> }) {
-  const { code } = use(params);
+export default function BoothClient() {
+  const searchParams = useSearchParams();
+  const code = searchParams.get('code') || '';
   const [event, setEvent] = useState<any>(null);
   const [photos, setPhotos] = useState<any[]>([]);
   const [reactions, setReactions] = useState<any[]>([]);
@@ -255,7 +257,7 @@ export default function BoothClient({ params }: { params: Promise<{ code: string
         {/* Header */}
         <header className="flex items-center justify-between mb-12">
           <div>
-            <Link href={`/gallery/${code}`} className="text-white/40 hover:text-white transition-colors flex items-center gap-2 mb-2 text-sm uppercase tracking-widest font-bold">
+            <Link href={`/gallery?code=${code}`} className="text-white/40 hover:text-white transition-colors flex items-center gap-2 mb-2 text-sm uppercase tracking-widest font-bold">
               <ArrowLeft className="w-4 h-4" /> Back to Gallery
             </Link>
             <h1 className="text-4xl font-serif font-light">Memory Booth</h1>

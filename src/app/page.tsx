@@ -3,18 +3,19 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Users, Sparkles, ArrowRight, ArrowUpRight, Crown, CheckCircle2, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Users, Sparkles, ArrowRight, ArrowUpRight, Crown, CheckCircle2, Loader2, Camera } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/utils/supabase/client';
-
-const supabase = createClient();
+import QRScanner from '@/components/QRScanner';
 
 export default function LandingPage() {
+  const supabase = createClient();
   const [joinCode, setJoinCode] = useState('');
   const [isJoining, setIsJoining] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [isPro, setIsPro] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
+  const [showQRScanner, setShowQRScanner] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -48,8 +49,27 @@ export default function LandingPage() {
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
     if (joinCode.trim()) {
-      router.push(`/gallery/${joinCode.toUpperCase()}`);
+      router.push(`/gallery?code=${joinCode.toUpperCase()}`);
     }
+  };
+
+  const handleQRScan = (code: string) => {
+    // If it's a full URL, extract the code parameter
+    let extractedCode = code;
+    try {
+      if (code.includes('?code=')) {
+        const url = new URL(code);
+        extractedCode = url.searchParams.get('code') || code;
+      } else if (code.includes('/gallery/')) {
+        // Fallback for legacy URL formats
+        extractedCode = code.split('/gallery/')[1] || code;
+      }
+    } catch (e) {
+      // Not a URL, use raw code
+    }
+    
+    setShowQRScanner(false);
+    router.push(`/gallery?code=${extractedCode.toUpperCase()}`);
   };
 
   const containerVariants: any = {
@@ -130,12 +150,22 @@ export default function LandingPage() {
                 <p className="text-white/50 text-sm md:text-base leading-relaxed mb-8 flex-grow">
                   Enter an invite code to view and share moments in an existing sanctuary.
                 </p>
-                <button 
-                  onClick={() => setIsJoining(true)}
-                  className="mt-auto flex items-center gap-2 text-sm md:text-base font-medium hover:text-white/70 transition-colors"
-                >
-                  Enter Code <ArrowUpRight className="w-4 h-4" />
-                </button>
+                <div className="mt-auto flex flex-col gap-3">
+                  <button 
+                    onClick={() => setIsJoining(true)}
+                    className="flex justify-between items-center w-full px-5 py-3 border border-white/10 rounded-xl hover:bg-white/5 transition-all text-sm font-medium"
+                  >
+                    <span className="flex items-center gap-2 italic text-white/40">Enter Code</span>
+                    <ArrowUpRight className="w-4 h-4 text-white/20" />
+                  </button>
+                  <button 
+                    onClick={() => setShowQRScanner(true)}
+                    className="flex justify-between items-center w-full px-5 py-3 bg-white text-black rounded-xl hover:bg-white/90 transition-all text-sm font-bold"
+                  >
+                    <span>Scan QR</span>
+                    <Camera className="w-4 h-4" />
+                  </button>
+                </div>
               </>
             ) : (
               <form onSubmit={handleJoin} className="w-full mt-auto space-y-4">
@@ -218,6 +248,15 @@ export default function LandingPage() {
           </span>
         </motion.footer>
       </motion.main>
+
+      <AnimatePresence>
+        {showQRScanner && (
+          <QRScanner 
+            onScan={handleQRScan}
+            onClose={() => setShowQRScanner(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

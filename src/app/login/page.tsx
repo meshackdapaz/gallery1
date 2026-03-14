@@ -6,9 +6,8 @@ import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 
-const supabase = createClient();
-
 function LoginContent() {
+  const supabase = createClient();
   const searchParams = useSearchParams();
   const errorParam = searchParams.get('error');
   const router = useRouter();

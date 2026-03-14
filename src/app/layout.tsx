@@ -1,13 +1,20 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
+import { Suspense } from 'react';
 import './globals.css';
 import SplashScreen from '@/components/SplashScreen';
 import Navbar from '@/components/Navbar';
 import { InsforgeProvider } from './providers';
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export const metadata: Metadata = {
   title: 'Memorial Gallery',
   description: 'Shared, real-time sanctuary for precious moments.',
-  viewport: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no',
 };
 
 export default function RootLayout({
@@ -20,8 +27,12 @@ export default function RootLayout({
       <body className="antialiased">
         <InsforgeProvider>
           <SplashScreen />
-          <Navbar />
-          {children}
+          <Suspense fallback={null}>
+            <Navbar />
+          </Suspense>
+          <div className="pb-32">
+            {children}
+          </div>
           <footer className="relative z-10 py-8 px-6 text-center border-t border-white/5">
             <p className="text-[10px] uppercase tracking-[0.4em] text-white/20 font-bold">
               © 2026 DAPAZCM • All Rights Reserved
