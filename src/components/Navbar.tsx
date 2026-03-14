@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { LogIn, User, LayoutGrid, Camera, Image as ImageIcon } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 
@@ -10,6 +10,7 @@ const supabase = createClient();
 
 export default function Navbar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
@@ -32,9 +33,12 @@ export default function Navbar() {
   if (pathname === '/login' || pathname === '/signup') return null;
 
   // Context-aware logic for memorial pages
+  const isMemorialContext = pathname === '/gallery' || pathname === '/booth' || pathname?.startsWith('/gallery/') || pathname?.startsWith('/booth/');
+  
+  // Try to get code from path first (legacy) then from search params (new)
   const pathParts = pathname?.split('/');
-  const isMemorialContext = pathname?.startsWith('/gallery/') || pathname?.startsWith('/booth/');
-  const contextCode = isMemorialContext ? pathParts[2] : null;
+  const codeFromPath = isMemorialContext && pathParts && pathParts.length >= 3 ? pathParts[2] : null;
+  const contextCode = codeFromPath || searchParams.get('code');
 
   return (
     <>
@@ -66,42 +70,44 @@ export default function Navbar() {
               {contextCode && (
                 <>
                   <Link 
-                    href={`/gallery/${contextCode}`}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full transition-all active:scale-95 text-sm font-medium ${
-                      pathname?.startsWith('/gallery/')
+                    href={`/gallery?code=${contextCode}`}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-full transition-all active:scale-95 text-xs sm:text-sm font-medium ${
+                      pathname === '/gallery' 
                       ? 'bg-white text-black font-bold' 
                       : 'text-white/60 hover:text-white hover:bg-white/5'
                     }`}
                   >
                     <ImageIcon className="w-4 h-4" />
-                    <span className="hidden sm:inline">Sanctuary</span>
+                    <span>Sanctuary</span>
                   </Link>
 
                   <Link 
-                    href={`/booth/${contextCode}`}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full transition-all active:scale-95 text-sm font-medium ${
-                      pathname?.startsWith('/booth/') 
+                    href={`/booth?code=${contextCode}`}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-full transition-all active:scale-95 text-xs sm:text-sm font-medium ${
+                      pathname === '/booth' 
                       ? 'bg-white text-black font-bold' 
                       : 'text-white/60 hover:text-white hover:bg-white/5'
                     }`}
                   >
                     <Camera className="w-4 h-4" />
-                    <span className="hidden sm:inline">Booth</span>
+                    <span>Booth</span>
                   </Link>
                 </>
               )}
               
-              <Link 
-                href="/dashboard#profile" 
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-full transition-all active:scale-95 text-sm font-medium ${
-                  pathname === '/dashboard' && (typeof window !== 'undefined' && window.location.hash === '#profile')
-                  ? 'bg-white text-black font-bold' 
-                  : 'text-white/60 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <User className="w-4 h-4" />
-                <span className="hidden sm:inline">Profile</span>
-              </Link>
+              {!isMemorialContext && (
+                <Link 
+                  href="/dashboard#profile" 
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-full transition-all active:scale-95 text-sm font-medium ${
+                    pathname === '/dashboard' && (typeof window !== 'undefined' && window.location.hash === '#profile')
+                    ? 'bg-white text-black font-bold' 
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <User className="w-4 h-4" />
+                  <span className="hidden sm:inline">Profile</span>
+                </Link>
+              )}
             </div>
           )}
         </div>
